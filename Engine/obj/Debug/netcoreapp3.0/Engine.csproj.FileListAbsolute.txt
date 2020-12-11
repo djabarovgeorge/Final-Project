@@ -1,0 +1,4 @@
+D:\Projects\Final Project\Source Code\Engine\Engine\bin\Debug\netcoreapp3.0\Engine.exe
+D:\Projects\Final Project\Source Code\Engine\Engine\obj\Debug\netcoreapp3.0\Engine.csprojAssemblyReference.cache
+D:\Projects\Final Project\Source Code\Engine\Engine\obj\Debug\netcoreapp3.0\Engine.AssemblyInfoInputs.cache
+D:\Projects\Final Project\Source Code\Engine\Engine\obj\Debug\netcoreapp3.0\Engine.AssemblyInfo.cs
