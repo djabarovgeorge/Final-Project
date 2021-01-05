@@ -1,54 +1,51 @@
 ﻿using Engine.Abstracts;
+using Engine.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Engine.Services
 {
-    class ConstructsShift : ShiftSetter
+    public class ConstructsShift : ShiftSetter
     {
-        public void Excute(int numberOfShiftsInDay, int numberOfDaysOfWork, int numberOfWorkersInShift)
+        bool isInitialized = false;
+        public ConstructsShift()
         {
-            NumberOfShiftsInDay = numberOfShiftsInDay;
-            WorketNumberOfDaysOfWork = numberOfDaysOfWork;
-            NumberOfWokersInShift = numberOfWorkersInShift;
-            // build the constraints
-            SetConstraints();
+        }
+        public ConstructsShift(int numberOfShiftsInDay, int numberOfDaysOfWork, int numberOfWorkersInShift, int numberOfWorkers)
+        {
+            SetNumberOfShiftsInDay(numberOfShiftsInDay);
+            SetNumberOfDaysOfWork(numberOfDaysOfWork);
+            SetNumberOfWorkersInShift(numberOfWorkersInShift);
+            SetNumberOfWorkers(numberOfWorkers);
+            this.isInitialized = true;
         }
 
-        public void Excute()
+
+        public override List<Employee> Excute()
         {
+            if(!isInitialized)
+                GenerateShiftParams();
 
-            // build numbet of shift in day
-            SetNumberOfShiftsInDay();
-
-            // build number of days of work
-            SetNumberOfDaysOfWork();
-
-            // build number of workers in shift
-            SetNumberOfWorkersInShift();
-
-            // build the constraints
-            SetConstraints();
-
+            var handler = new ConstraintsHandler(NumberOfWorkers, NumberOfDaysOfWork, NumberOfShiftsInDay, NumberOfWokersInShift);
+            return handler.MakeListOfEmployess();
         }
 
-        public override void SetNumberOfShiftsInDay()
+        public override void SetNumberOfShiftsInDay(int num)
         {
-            NumberOfShiftsInDay = GenerateRandomNumberInRange(2, 4);
+            NumberOfShiftsInDay = num;
         }
-        public override void SetNumberOfDaysOfWork()
+        public override void SetNumberOfDaysOfWork(int num)
         {
-            WorketNumberOfDaysOfWork = GenerateRandomNumberInRange(2, 5);
+            NumberOfDaysOfWork = num;
         }
-        public override void SetNumberOfWorkersInShift()
+        public override void SetNumberOfWorkersInShift(int num)
         {
-            WorketNumberOfDaysOfWork = GenerateRandomNumberInRange(2, 4);
+            NumberOfWokersInShift = num;
         }
-
-        public override void SetConstraints()
+        public override void SetNumberOfWorkers(int num)
         {
-            throw new NotImplementedException();
+            NumberOfWorkers = num;
         }
 
 
@@ -56,7 +53,45 @@ namespace Engine.Services
         private int GenerateRandomNumberInRange(int min, int max)
         {
             Random rnd = new Random();
-            return rnd.Next(0, 100);
+            return rnd.Next(min, max);
+        }
+
+        public void GenerateShiftParams()
+        {
+            var listOfPosibleParams = new List<List<int>>();
+
+
+            #region Build posible params so the shifts will suit the number of employees
+
+            for (int NumberOfDaysOfWork = 2; NumberOfDaysOfWork <= 5; NumberOfDaysOfWork++)
+            {
+                for (int NumberOfShiftsInDay = 2; NumberOfShiftsInDay <= 4; NumberOfShiftsInDay++)
+                {
+                    for (int NumberOfWokersInShift = 2; NumberOfWokersInShift <= 4; NumberOfWokersInShift++)
+                    {
+                        for (int workers = 3; workers <= 10; workers++)
+                        {
+                            var checkIfValid = ((float)NumberOfDaysOfWork * (float)NumberOfShiftsInDay * (float)NumberOfWokersInShift) / workers;
+                            if (checkIfValid % 2 == 0)
+                            {
+                                listOfPosibleParams.Add(new List<int> { NumberOfDaysOfWork, NumberOfShiftsInDay, NumberOfWokersInShift, workers });
+                                //Console.WriteLine($"NumberOfDaysOfWork: {NumberOfDaysOfWork} NumberOfShiftsInDay: {NumberOfShiftsInDay} NumberOfWokersInShift: {NumberOfWokersInShift} workers: {workers}");
+                                //Console.WriteLine($"[{NumberOfDaysOfWork}, {NumberOfShiftsInDay}, {NumberOfWokersInShift}, {workers}]");
+                            }
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            // Extract one posible combination
+            var randIndex = GenerateRandomNumberInRange(0, listOfPosibleParams.Count);
+
+            SetNumberOfDaysOfWork(listOfPosibleParams[randIndex][0]);
+            SetNumberOfShiftsInDay(listOfPosibleParams[randIndex][1]);
+            SetNumberOfWorkersInShift(listOfPosibleParams[randIndex][2]);
+            SetNumberOfWorkers(listOfPosibleParams[randIndex][3]);
+
         }
     }
 }

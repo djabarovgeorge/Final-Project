@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Services;
+using System;
 
 namespace Engine
 {
@@ -8,7 +9,14 @@ namespace Engine
 
         static void Main(string[] args)
         {
+            // the start of our program
+
+            Manager manager = new Manager();
+
+            manager.ManageShifts();
+
             Console.WriteLine(Value);
-        }
+
+    }
     }
 }

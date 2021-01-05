@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,12 +7,11 @@ namespace Engine.Interfaces
 {
     public interface IShiftSetter
     {
-        void SetNumberOfShiftsInDay();
-        void SetNumberOfDaysOfWork();
-        void SetNumberOfWorkersInShift();
-        int SetNumberOfWorkers();
+        void SetNumberOfShiftsInDay(int num);
+        void SetNumberOfDaysOfWork(int num);
+        void SetNumberOfWorkersInShift(int num);
+        void SetNumberOfWorkers(int num);
 
-
-        void SetConstraints();
+        List<Employee> Excute();
     }
 }
