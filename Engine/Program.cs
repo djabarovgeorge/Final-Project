@@ -1,4 +1,5 @@
-﻿using Engine.Services;
+﻿using Engine.Algorithms;
+using Engine.Services;
 using System;
 
 namespace Engine
@@ -15,8 +16,8 @@ namespace Engine
 
             manager.ManageShifts();
 
-            Console.WriteLine(Value);
 
-    }
+            Console.WriteLine(Value);
+        }
     }
 }

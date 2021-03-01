@@ -11,13 +11,13 @@ namespace Engine.Models
         public Employee()
         {
             WeeklyConstraints = new Dictionary<string, string>(){
-                    {"Sundey","Free day"},
+                    {"Sunday","Free day"},
                     {"Monday","Free day"},
                     {"Tuesday","Free day"},
                     {"Wednesday","Free day"},
                     {"Thursday","Free day"},
                     {"Friday","Free day"},
-                    {"Saturdaty","Free day"}
+                    {"Saturday","Free day"}
                     };
         }
     }

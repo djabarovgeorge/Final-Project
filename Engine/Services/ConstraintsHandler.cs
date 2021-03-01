@@ -94,7 +94,7 @@ namespace Engine.Services
 
         public string GenerateRandomDay()
         {
-            var randDay = new List<string> { "Sundey", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturdaty" };
+            var randDay = new List<string> { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
             var randIndex = rnd.Next(0, 7);
 
             return randDay[randIndex];
