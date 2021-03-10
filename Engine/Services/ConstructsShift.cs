@@ -8,9 +8,10 @@ namespace Engine.Services
 {
     public class ConstructsShift : ShiftSetter
     {
-        bool isInitialized = false;
+        private bool isInitialized = false;
         public ConstructsShift()
         {
+
         }
         public ConstructsShift(int numberOfShiftsInDay, int numberOfDaysOfWork, int numberOfWorkersInShift, int numberOfWorkers)
         {
@@ -22,13 +23,24 @@ namespace Engine.Services
         }
 
 
-        public override List<Employee> Excute()
+        public override ShiftsContainer Excute()
         {
             if(!isInitialized)
                 GenerateShiftParams();
 
             var handler = new ConstraintsHandler(NumberOfWorkers, NumberOfDaysOfWork, NumberOfShiftsInDay, NumberOfWokersInShift);
-            return handler.MakeListOfEmployess();
+
+            var empConstraints = handler.MakeListOfEmployess();
+            var shiftParams = new ShiftParams()
+            {
+                DaysOfWork = DaysOfWork,
+                NumberOfDaysOfWork = NumberOfDaysOfWork,
+                NumberOfShiftsInDay = NumberOfShiftsInDay,
+                NumberOfWokersInShift = NumberOfWokersInShift,
+                NumberOfWorkers = NumberOfWorkers
+            };
+
+            return new ShiftsContainer() { EmployeeConstraints = empConstraints, ShiftParams = shiftParams };
         }
 
         public override void SetNumberOfShiftsInDay(int num)
@@ -69,10 +81,11 @@ namespace Engine.Services
                 {
                     for (int NumberOfWokersInShift = 2; NumberOfWokersInShift <= 4; NumberOfWokersInShift++)
                     {
-                        for (int workers = 3; workers <= 10; workers++)
+                        for (int workers = 3; workers <= 30; workers++)
                         {
-                            var checkIfValid = ((float)NumberOfDaysOfWork * (float)NumberOfShiftsInDay * (float)NumberOfWokersInShift) / workers;
-                            if (checkIfValid % 2 == 0)
+                            var checkIfValid = (DaysOfWork * (float)NumberOfShiftsInDay * (float)NumberOfWokersInShift) / workers;
+                            var ifEnoughWorkers = (DaysOfWork * NumberOfShiftsInDay * NumberOfWokersInShift) == workers* NumberOfDaysOfWork;
+                            if (checkIfValid % 2 == 0 && ifEnoughWorkers)
                             {
                                 listOfPosibleParams.Add(new List<int> { NumberOfDaysOfWork, NumberOfShiftsInDay, NumberOfWokersInShift, workers });
                                 //Console.WriteLine($"NumberOfDaysOfWork: {NumberOfDaysOfWork} NumberOfShiftsInDay: {NumberOfShiftsInDay} NumberOfWokersInShift: {NumberOfWokersInShift} workers: {workers}");

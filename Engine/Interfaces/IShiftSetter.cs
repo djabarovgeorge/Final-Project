@@ -12,6 +12,6 @@ namespace Engine.Interfaces
         void SetNumberOfWorkersInShift(int num);
         void SetNumberOfWorkers(int num);
 
-        List<Employee> Excute();
+        ShiftsContainer Excute();
     }
 }

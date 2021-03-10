@@ -18,6 +18,6 @@ namespace Engine.Abstracts
         public abstract void SetNumberOfDaysOfWork(int num);
         public abstract void SetNumberOfWorkersInShift(int num);
         public abstract void SetNumberOfWorkers(int num);
-        public abstract List<Employee> Excute();
+        public abstract ShiftsContainer Excute();
     }
 }

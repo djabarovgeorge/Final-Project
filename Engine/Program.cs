@@ -14,7 +14,7 @@ namespace Engine
 
             Manager manager = new Manager();
 
-            manager.ManageShifts();
+            manager.Execute();
 
 
             Console.WriteLine(Value);

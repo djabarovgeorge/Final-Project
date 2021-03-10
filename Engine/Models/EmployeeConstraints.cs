@@ -4,12 +4,15 @@ using System.Text;
 
 namespace Engine.Models
 {
-    public class Employee
+    public class EmployeeConstraints
     {
+        public string Name { get; set; }
         public Dictionary<string, string> WeeklyConstraints { get; set; }
 
-        public Employee()
+        public EmployeeConstraints(string name)
         {
+            Name = name;
+
             WeeklyConstraints = new Dictionary<string, string>(){
                     {"Sunday","Free day"},
                     {"Monday","Free day"},

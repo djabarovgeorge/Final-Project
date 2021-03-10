@@ -9,7 +9,7 @@ namespace Engine.Services
     {
         Random rnd;
 
-        private List<Employee> employeesConstraints = new List<Employee>();
+        private List<EmployeeConstraints> employeesConstraints = new List<EmployeeConstraints>();
 
         //To save number of employees
         private int numberOfShiftsInWeek;
@@ -35,7 +35,7 @@ namespace Engine.Services
         private Dictionary<String, int> week;
 
         //List to run on the dictionary (WEEK);
-        private String[] thisWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+        private readonly string[] thisWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
         //If i don't have 7 days , I randomly choose the days
         //I build list for choose (The size of the array will be about the size of a week)
@@ -63,11 +63,11 @@ namespace Engine.Services
         }
 
 
-        public List<Employee> MakeListOfEmployess()
+        public List<EmployeeConstraints> MakeListOfEmployess()
         {
             for (int empNum = 0; empNum < totalNumberOfEmployess; empNum++)
             {
-                var emp = new Employee();
+                var emp = new EmployeeConstraints((empNum + 1).ToString());
                 for (int shiftInit = 0; shiftInit < numberOfShiftsInWeek; shiftInit++)
                 {
                     var randDay = GenerateRandomDay();
