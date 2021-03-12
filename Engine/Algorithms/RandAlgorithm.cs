@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Engine.Algorithms
 {
@@ -11,7 +10,7 @@ namespace Engine.Algorithms
 
         private List<Worker> _workersBackLog = new List<Worker>();
 
-        public void Execute(Schedulare schedulare , ShiftsContainer shiftsContainer)
+        public void Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
             // step 1 init with all the constrains
             InitialTheSchedular(schedulare, shiftsContainer);
@@ -110,5 +109,4 @@ namespace Engine.Algorithms
                 }
             }
         }
-    }
 }

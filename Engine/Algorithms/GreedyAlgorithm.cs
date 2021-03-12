@@ -1,69 +1,61 @@
-﻿//using Engine.Abstracts;
-//using Engine.Models;
-//using Engine.Services;
-//using System;
-//using System.Collections.Generic;
-//using System.Text;
+﻿using Engine.Models;
+using System.Collections.Generic;
+using System.Linq;
 
-//namespace Engine.Algorithms
-//{
-//    class GreedyAlgorithm
-//    {
+namespace Engine.Algorithms
+{
+    public class GreedyAlgorithm
+    {
 
-//        private List<string> randDay = new List<string> { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-//        private Dictionary<string, Dictionary<string, List<string>>> schedule = new Dictionary<string, Dictionary<string, List<string>>>();
-//        private string[] typesOfShifts = { "Morning", "Afternoon", "Nigth" };
-//        private ShiftSetter shiftSetter = new ConstructsShift();
-//        private int numberOfEmployess;
-//        private int workingDaysPerWeek;
-//        private int theAmountOfShiftsPerDay;
-//        private List<EmployeeConstraints> listOfEmployess;//change name
+        public void Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        {
+            StartAlgorithm( schedulare,  shiftsContainer);
+        }
 
-//        public GreedyAlgorithm()
-//        {
-//            this.listOfEmployess = shiftSetter.Excute();
+        public GreedyAlgorithm()
+        {
+        }
 
-//        }
+        public void StartAlgorithm(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        {
+            List<GreedyEmployee> greedyEmpList = new List<GreedyEmployee>();
 
-//        public GreedyAlgorithm(int numberOfEmployess ,int workingDaysPerWeek ,int theAmountOfShiftsPerDay)
-//        {
-//            this.numberOfEmployess = numberOfEmployess;
-//            this.workingDaysPerWeek = workingDaysPerWeek;
-//            this.theAmountOfShiftsPerDay = theAmountOfShiftsPerDay;
-//            this.listOfEmployess = shiftSetter.Excute();
-//        }
-//        public void StartAlgorithm()
-//        {
-//            for (int i = 0; i < listOfEmployess.Count; i++)
-//            {
-//                Console.WriteLine($"1212Empyloee Number: {i + 1} -------------------------");
-//                foreach (var dayOfWork in listOfEmployess[i].WeeklyConstraints)
-//                {
-//                    switch (dayOfWork.Key)
-//                    {
-//                        case "Sunday":
+            foreach (var emp in shiftsContainer.EmployeeConstraints)
+            {
+                var currEmpName = new Worker() { Name = emp.Name };
 
-//                            break;
-//                        case "Monday":
-//                            break;
-//                        case "Tuesday":
-//                            break;
-//                        case "Wednesday":
-//                            break;
-//                        case "Thursday":
-//                            break;
-//                        case "Friday":
-//                            break;
-//                        case "Saturday":
-//                            break;
-
-//                    }
-                        
-//                    Console.WriteLine($"{dayOfWork.Key} : {dayOfWork.Value}");
-//                }
-//            }
-//        }
+                var greedyEmploee = new GreedyEmployee() { Name = emp.Name };
 
 
-//    }
-//}
+                foreach (var empDay in emp.WeeklyConstraints)
+                {
+                    if (empDay.Value.Contains("Free day")) continue;
+
+                    var constraintsDay = empDay.Key;
+                    var constraintsShift = empDay.Value;
+
+                    var schedulareDay = schedulare.Days.FirstOrDefault(x => x.Name.Contains(constraintsDay));
+
+                    var schedulareShift = schedulareDay.Shifts.FirstOrDefault(x => x.Name.Contains(constraintsShift));
+
+                    if(schedulareShift.Workers.Count < shiftsContainer.ShiftParams.NumberOfWokersInShift)
+                    {
+                        greedyEmploee.AddShift();
+                        schedulareShift.Workers.Add(currEmpName);
+                    }
+                    else
+                    {
+                        var shift = new EmployeeShift() { Day = constraintsDay , ShiftName = constraintsShift };
+
+                        greedyEmploee.ShiftsThatWasNotAssigned.Add(shift);
+                    }
+                }
+                greedyEmpList.Add(greedyEmploee);
+            }
+
+
+            var conflicts = greedyEmpList.Where(x => x.ShiftsThatWasNotAssigned.Count > 0).ToList();
+
+        }
+    }
+}

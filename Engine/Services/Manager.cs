@@ -12,6 +12,8 @@ namespace Engine.Services
     {
         private ShiftSetter _constructsShift = new ConstructsShift();
         private RandAlgorithm _randAlgorithm = new RandAlgorithm();
+        private GreedyAlgorithm _greedyAlgorithm = new GreedyAlgorithm();
+
 
 
         public void Execute()
@@ -21,6 +23,10 @@ namespace Engine.Services
             var schedulare = new Schedulare(shiftsContainer);
 
             _randAlgorithm.Execute(schedulare, shiftsContainer);
+
+            var greedySchedulare = new Schedulare(shiftsContainer);
+
+            _greedyAlgorithm.Execute(greedySchedulare, shiftsContainer);
 
 
         }

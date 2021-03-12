@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\Engine.csproj": {}
+    "C:\\Users\\Nir\\Source\\Repos\\Final-Project-12.3.21-2\\Final-Project\\Engine\\Engine.csproj": {}
   },
   "projects": {
-    "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\Engine.csproj": {
+    "C:\\Users\\Nir\\Source\\Repos\\Final-Project-12.3.21-2\\Final-Project\\Engine\\Engine.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\Engine.csproj",
+        "projectUniqueName": "C:\\Users\\Nir\\Source\\Repos\\Final-Project-12.3.21-2\\Final-Project\\Engine\\Engine.csproj",
         "projectName": "Engine",
-        "projectPath": "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\Engine.csproj",
-        "packagesPath": "C:\\Users\\Gosha\\.nuget\\packages\\",
-        "outputPath": "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\obj\\",
+        "projectPath": "C:\\Users\\Nir\\Source\\Repos\\Final-Project-12.3.21-2\\Final-Project\\Engine\\Engine.csproj",
+        "packagesPath": "C:\\Users\\Nir\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Nir\\Source\\Repos\\Final-Project-12.3.21-2\\Final-Project\\Engine\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Gosha\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Nir\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,6 +26,7 @@
         },
         "frameworks": {
           "netcoreapp3.0": {
+            "targetAlias": "netcoreapp3.0",
             "projectReferences": {}
           }
         },
@@ -37,6 +38,7 @@
       },
       "frameworks": {
         "netcoreapp3.0": {
+          "targetAlias": "netcoreapp3.0",
           "imports": [
             "net461",
             "net462",
@@ -47,12 +49,30 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[3.0.1, 3.0.1]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[3.0.3, 3.0.3]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[3.0.0, 3.0.0]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[3.0.0, 3.0.0]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     }
