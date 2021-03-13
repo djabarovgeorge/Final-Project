@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Engine.Models
 {
+    [Serializable]
     public class Schedulare
     {
         private Dictionary<int, List<string>> shiftsTypes = new Dictionary<int, List<string>>
@@ -58,19 +59,19 @@ namespace Engine.Models
             return shifts;
         }
     }
-
+    [Serializable]
     public class Day
     {
         public string Name { get; set; }
         public List<Shift> Shifts { get; set; }
     }
-
+    [Serializable]
     public class Shift
     {
         public string Name { get; set; }
         public List<Worker> Workers { get; set; }    
     }
-
+    [Serializable]
     public class Worker
     {
         public string Name { get; set; }
