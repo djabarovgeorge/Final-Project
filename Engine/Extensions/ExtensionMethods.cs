@@ -23,6 +23,11 @@ namespace Engine.Extensions
             return str.Contains(containsIn, System.StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool CompareContent(this string str, string containsIn)
+        {
+            return str.Trim() == containsIn.Trim();
+        }
+
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> enumerable)
         {
             if (enumerable == null)
