@@ -10,6 +10,7 @@ namespace Engine.Algorithms
     {
 
         private List<Worker> _workersBackLog = new List<Worker>();
+        private List<Day> _unresolvedShifts = new List<Day>();
 
         public void Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
@@ -43,16 +44,39 @@ namespace Engine.Algorithms
 
                 // fetch matching shift from schedulare as was fetched from the backlog
                 var schedulareDay = schedulare.Days.FirstOrDefault(x => x.Name.ContainsContent(backLogShiftDayToFill.Name));
-                var schedulareShift = schedulareDay.Shifts.FirstOrDefault(x => x.Name.ContainsContent(backLogShiftToFill.Shift.Name));
+                var schedulareShift = schedulareDay.Shifts.FirstOrDefault(x => x.Name.CompareContent(backLogShiftToFill.Shift.Name));
 
-                var randomEmployee = GetRandomEmployee();
+                AssignRandomEmployee(schedulare, schedulareDay, schedulareShift);
 
-                // add worker to the schedulare 
-                schedulareShift.Workers.Add(randomEmployee);
-
-                // remove worker from the backlog
-                _workersBackLog.Remove(randomEmployee);
             }
+        }
+
+        private void AssignRandomEmployee(Schedulare schedulare, Day schedulareDay, Shift schedulareShift)
+        {
+            Func<Schedulare, Day, Shift, bool, bool> action = TryOrAssignEmployee;
+            var isAssined = CommonLogic.TryWithRetries(10, () => TryOrAssignEmployee(schedulare, schedulareDay, schedulareShift));
+
+            if (!isAssined) // failed to fill current shift 'schedulareShift'
+            {
+                TryOrAssignEmployee(schedulare, schedulareDay, schedulareShift, false);
+                _unresolvedShifts.Add(new Day() { Name = schedulareDay.Name, Shifts = schedulareDay.Shifts.Where(x => x.Name.CompareContent(schedulareShift.Name)).ToList() });
+            }
+        }
+
+        private bool TryOrAssignEmployee(Schedulare schedulare, Day schedulareDay, Shift schedulareShift, bool validate = true)
+        {
+            var randomEmployee = GetRandomEmployee();
+
+            if(validate) // validate if the employee can enter the shift
+                if (!CommonLogic.IsValidToAssign(schedulare, schedulareDay, schedulareShift, randomEmployee)) return false;
+
+            // add worker to the schedulare 
+            schedulareShift.Workers.Add(randomEmployee);
+
+            // remove worker from the backlog
+            _workersBackLog.Remove(randomEmployee);
+
+            return true;
         }
 
 
