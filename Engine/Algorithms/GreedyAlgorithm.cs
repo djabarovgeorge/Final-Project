@@ -67,7 +67,7 @@ namespace Engine.Algorithms
                     foreach(var iDontHaveThisDayList in employeeCheck.ShiftsThatWasNotAssigned)
                     {
                         var shiftDay = schedulare.Days.FirstOrDefault(x => x.Name.ContainsContent(iDontHaveThisDayList.Day));
-                        var shift = shiftDay.Shifts.FirstOrDefault(x => x.Name.ContainsContent(iDontHaveThisDayList.ShiftName));
+                        var shift = shiftDay.Shifts.FirstOrDefault(x => x.Name.CompareContent(iDontHaveThisDayList.ShiftName));
                         //schedulare.Days[week.IndexOf(iDontHaveThisDay.Day)];
                         var currShiftGreedyWorkers = shift.Workers.Select(x => greedyEmpList.FirstOrDefault(y => x.Name.ContainsContent(y.Name))).ToList();
 
