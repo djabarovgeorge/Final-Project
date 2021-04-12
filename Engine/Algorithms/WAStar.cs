@@ -7,19 +7,22 @@ using System.Linq;
 
 namespace Engine.Algorithms
 {
-    public class BFS 
+    class WAStar
     {
+
         private int _twoShiftsInARowWeight = 10;
-        private int _lackSatisfactionConstraintsWeight = 20;
+        private int _lackSatisfactionConstraintsWeight = 10;
         private int _shiftsInARow = 20;
         private int _unwantedShift = 20;
+        private const double ALFA = 0.02;
 
+        private double _threshold;
         public Schedulare Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
         {
-            if(weightContainer !=null)
+            if (weightContainer != null)
                 UpdateWeights(weightContainer);
 
-            var openSet = new IntervalHeap<SchedulareState>(new SchedulareComparer());
+            var openSet = new SortedArray<SchedulareState>(new SchedulareComparerArray());
 
             var root = new TreeNode<Schedulare>(schedulare);
 
@@ -27,47 +30,50 @@ namespace Engine.Algorithms
 
             openSet.Add(schedulareState);
 
-            var closeSet = new IntervalHeap<SchedulareState>(new SchedulareComparer());
+            UpdateThreshold(schedulareState);
+
+            var closeSet = new SortedArray<SchedulareState>(new SchedulareComparerArray());
+
+            #region Debug full schedular
+            // DEBUG - remove first worker from the first shift
+            //schedulare.Days.FirstOrDefault().Shifts.FirstOrDefault().Workers.Remove(schedulare.Days.FirstOrDefault().Shifts.FirstOrDefault().Workers.FirstOrDefault());
+            //currShiftToAssin.Workers.Add(new Worker() { Name="nick"});
+            #endregion	
+
 
             TreeNode<Schedulare> result = null;
 
-            while (!openSet.IsEmpty)
+
+            while (!openSet.IsNullOrEmpty())
             {
-                #region Debug full schedular
-                // DEBUG - remove first worker from the first shift
-                //schedulare.Days.FirstOrDefault().Shifts.FirstOrDefault().Workers.Remove(schedulare.Days.FirstOrDefault().Shifts.FirstOrDefault().Workers.FirstOrDefault());
-                //currShiftToAssin.Workers.Add(new Worker() { Name="nick"});
-                #endregion
+                var currState = GetCurrentState(openSet);
 
-                var currState = openSet.FindMin();
+                openSet.Remove(currState);
 
-                #region Update queue sets
-                openSet.DeleteMin();
                 closeSet.Add(currState);
-                #endregion
+
+                // DEBUG
+                PrintTree(root, currState);
+                Console.WriteLine($"_threshold - {_threshold}");
+                Console.WriteLine($"openSet count - {openSet.Count}");
 
 
                 var currNode = currState.Node;
 
-                //if (IsGoal(currNode.Value, shiftsContainer))
-                //{
-                //    result = currNode;
-                //    break;
-                //}
-                if (currState.Weight < 200)
+                if ((currState.Weight < 50) && IsGoal(currNode.Value , shiftsContainer))
                 {
                     result = currNode;
                     break;
                 }
 
                 // DEBUG
-                PrintTree(root, currState);
-                Console.WriteLine($"openSet count - {openSet.Count}");
                 CommonLogic.PrintSchedulare(currNode.Value, shiftsContainer);
 
+                // if the current node is not goal remove the node from open list
                 if (IsGoal(currNode.Value, shiftsContainer))
                 {
-                    openSet.DeleteMin();
+                    openSet.Remove(currState);
+                    closeSet.Add(currState);
                     continue;
                 }
 
@@ -96,12 +102,40 @@ namespace Engine.Algorithms
                 #endregion
             }
 
-            // DEBUG 
+
             var percentageOfSatisfaction = CommonLogic.GetPercentageOfSatisfaction(result.Value, shiftsContainer);
+
+            // DEBUG 
             CommonLogic.PrintSchedulare(result.Value, shiftsContainer);
             Console.WriteLine($"Percentage of workes constrains satisfaction = {percentageOfSatisfaction}");
 
             return result.Value;
+        }
+
+        private SchedulareState GetCurrentState(SortedArray<SchedulareState> openSet)
+        {
+            SchedulareState state = null;
+
+            // choose state only if it is not the the min (to cover more space)
+            //if(openSet.FirstOrDefault().Weight < _threshold)
+            //    state = openSet.FirstOrDefault(x=> x.Weight > _threshold);
+
+            state = openSet.FirstOrDefault(x => x.Weight > _threshold);
+
+            if (state == null)
+            {
+                state = openSet.LastOrDefault();
+            }
+
+            UpdateThreshold(state);
+
+            return state;
+        }
+
+        private void UpdateThreshold(SchedulareState state = null)
+        {
+            //_threshold = state != null? state.Weight -1 : _threshold - 1;
+            _threshold = state.Weight * ALFA;
         }
 
         private void UpdateWeights(WeightContainer weightContainer)
@@ -136,7 +170,7 @@ namespace Engine.Algorithms
             return incompleteShiftCount.Equals(0);
         }
 
-        private static List<Shift> GetIncompleteShiftList(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        private static System.Collections.Generic.List<Shift> GetIncompleteShiftList(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
             var shiftsList = schedulare.Days.SelectMany(x => x.Shifts).ToList();
 
@@ -150,23 +184,23 @@ namespace Engine.Algorithms
         {
 
             var weight = 0;
-            // if workers have 2 shifts in the row +10
+            // If workers have 2 shifts in the row +10
             TwoShiftsInARowWeight(schedulare, shiftsContainer, ref weight);
 
-            // if worker did not got the shift he asked for +20
+            // If the worker did not get the shift he asked for +20
             LackSatisfactionConstraintsWeight(schedulare, shiftsContainer, ref weight);
 
-            // if worker have 5 work days in the row +20
+            // If a worker has 5 work days in the row +20
             var shiftsInARow = 3;
             ShiftsInARow(schedulare, shiftsContainer, ref weight, shiftsInARow);
 
-            // if worker got shift that he did not asked +20
-            UnwantedShift(schedulare, shiftsContainer,ref weight);
+            // If the worker got a shift that he did not ask +20
+            UnwantedShift(schedulare, shiftsContainer, ref weight);
 
             return new SchedulareState() { Node = treeNode, Weight = weight };
         }
 
-        private int UnwantedShift(Schedulare schedulare, ShiftsContainer shiftsContainer,ref int weight)
+        private int UnwantedShift(Schedulare schedulare, ShiftsContainer shiftsContainer, ref int weight)
         {
             foreach (var employee in shiftsContainer.EmployeeConstraints)
             {
@@ -216,7 +250,7 @@ namespace Engine.Algorithms
             return weight;
         }
 
-        private int LackSatisfactionConstraintsWeight(Schedulare schedulare, ShiftsContainer shiftsContainer,ref int weight)
+        private int LackSatisfactionConstraintsWeight(Schedulare schedulare, ShiftsContainer shiftsContainer, ref int weight)
         {
             foreach (var employee in shiftsContainer.EmployeeConstraints)
             {
@@ -238,7 +272,7 @@ namespace Engine.Algorithms
             return weight;
         }
 
-        private int TwoShiftsInARowWeight(Schedulare schedulare, ShiftsContainer shiftsContainer,ref int weight)
+        private int TwoShiftsInARowWeight(Schedulare schedulare, ShiftsContainer shiftsContainer, ref int weight)
         {
             foreach (var employee in shiftsContainer.EmployeeConstraints)
             {

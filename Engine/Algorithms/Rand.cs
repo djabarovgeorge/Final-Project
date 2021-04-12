@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Engine.Algorithms
 {
-    public class RandAlgorithm
+    public class Rand
     {
 
         private List<Worker> _workersBackLog = new List<Worker>();
@@ -151,19 +151,24 @@ namespace Engine.Algorithms
             return _workersBackLog[rInt];
         }
 
-
+        /// <summary>
+        /// Assign the shifts as is from the constrains
+        /// Can cause conflicts in schedulare
+        /// </summary>
+        /// <param name="schedulare"></param>
+        /// <param name="shiftsContainer"></param>
         private static void InitialTheSchedular(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
             foreach (var emp in shiftsContainer.EmployeeConstraints)
             {
                 var currEmpName = new Worker() { Name = emp.Name };
 
-                foreach (var empDay in emp.WeeklyConstraints)
+                foreach (var empDayConstraint in emp.WeeklyConstraints)
                 {
-                    if (empDay.Value.Contains("Free day")) continue;
+                    if (empDayConstraint.Value.Contains("Free day")) continue;
 
-                    var constraintsDay = empDay.Key;
-                    var constraintsShift = empDay.Value;
+                    var constraintsDay = empDayConstraint.Key;
+                    var constraintsShift = empDayConstraint.Value;
 
                     var schedulareDay = schedulare.Days.FirstOrDefault(x => x.Name.Contains(constraintsDay));
 

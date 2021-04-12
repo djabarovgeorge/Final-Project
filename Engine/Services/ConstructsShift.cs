@@ -100,6 +100,10 @@ namespace Engine.Services
             // Extract one posible combination
             var randIndex = GenerateRandomNumberInRange(0, listOfPosibleParams.Count);
 
+            #region Debug the smallest combination
+            randIndex = 5;
+            #endregion
+
             SetNumberOfDaysOfWork(listOfPosibleParams[randIndex][0]);
             SetNumberOfShiftsInDay(listOfPosibleParams[randIndex][1]);
             SetNumberOfWorkersInShift(listOfPosibleParams[randIndex][2]);
