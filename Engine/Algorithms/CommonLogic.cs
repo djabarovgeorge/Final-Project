@@ -1,4 +1,5 @@
-﻿using Engine.Extensions;
+﻿using ConsoleTables;
+using Engine.Extensions;
 using Engine.Models;
 using System;
 using System.Collections.Generic;
@@ -54,6 +55,78 @@ namespace Engine.Algorithms
             return true;
         }
 
+        public static Double GetPercentageOfSatisfaction(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        {
+            var numberOfWorkerConstrains = shiftsContainer.EmployeeConstraints.Count * shiftsContainer.ShiftParams.NumberOfDaysOfWork;
+
+            var count = 0;
+
+            foreach (var day in schedulare.Days)
+            {
+                foreach (var shift in day.Shifts)
+                {
+                    foreach (var worker in shift.Workers)
+                    {
+                        if (IswantedShift(schedulare, shiftsContainer, worker.Name, day.Name, shift))
+                        {
+                            count++;
+                        }
+                    }
+                }
+            }
+
+            var percentageOfSatisfaction = ((Double)count / (Double)numberOfWorkerConstrains) * 100;
+
+            return percentageOfSatisfaction;
+        }
+        public static void PrintSchedulare(Schedulare value=null, ShiftsContainer shiftsContainer=null)
+        {
+
+            var columns = value.Days.Select(x => x.Name).ToArray();
+
+            var table = new ConsoleTable(columns);
+
+            var data = value.Days.Select(x => x.Shifts).ToList();
+
+            var rows = new List<Week>();
+            for (int i = 0; i < data.FirstOrDefault().Count; i++)
+            {
+                //var list = data.Select(x => string.Join(",", x[i].Workers.Select(y => y.Name).ToList())).ToList();
+                //var day = (DayOfWeek)i;
+                //var dayString = day.ToString();
+
+                var list = new List<string>();
+                //list = data.Select(x => string.Join(",", x[i].Workers.Select(y => IswantedShift(value, shiftsContainer, y.Name , dayString, x[i])? y.Name : $"{y.Name} X").ToList())).ToList();
+
+                for (int dayI = 0; dayI < data.Count; dayI++)
+                {
+                    var day = (DayOfWeek)dayI;
+                    var dayString = day.ToString();
+                    list.Add(string.Join(",", data[dayI][i].Workers.Select(y => IswantedShift(value, shiftsContainer, y.Name, dayString, data[dayI][i]) ? y.Name : $"{y.Name} X").ToList()));
+                }
+
+                var obj = new Week(list);
+
+                rows.Add(obj);
+            }
+
+            ConsoleTable
+                .From(rows)
+                .Configure(o => o.NumberAlignment = Alignment.Right)
+                .Write(Format.Alternative);
+
+        }
+
+        private static bool IswantedShift(Schedulare schedulare, ShiftsContainer shiftsContainer, string employeeName, string currDay, Shift shift)
+        {
+
+            var currEmpConstraints = shiftsContainer.EmployeeConstraints.FirstOrDefault(x => x.Name.CompareContent(employeeName));
+
+            var dayToValidate = currEmpConstraints.WeeklyConstraints.FirstOrDefault(x => x.Key.CompareContent(currDay));
+
+            return dayToValidate.Value.CompareContent(shift.Name);
+        }
+
         private static bool IsEmployeeInShift(Shift _schedulareShift, Worker _randomEmployee)
         {
             return _schedulareShift.Workers.Any(x => x.Name.CompareContent(_randomEmployee.Name));
@@ -84,72 +157,66 @@ namespace Engine.Algorithms
             }
             return false;
         }
+
+        private class Week
+        {
+        public string Sunday { get; set; }
+        public string Monday { get; set; }
+        public string Tuesday { get; set; }
+        public string Wednesday { get; set; }
+        public string Thursday { get; set; }
+        public string Friday { get; set; }
+        public string Saturday { get; set; }
+
+
+        public Week(List<string> list)
+            {
+                Sunday = list[0];
+                Monday = list[1];
+                Tuesday = list[2];
+                Wednesday = list[3];
+                Thursday = list[4];
+                Friday = list[5];
+                Saturday = list[6];
+            }
+        }
     }
 
-    //public static class TryWithRetries
-    //{
-    //    //public static void Do(
-    //    //    Action action,
-    //    //    TimeSpan retryInterval,
-    //    //    int maxAttemptCount = 3)
-    //    //{
-    //    //    Do<object>(() =>
-    //    //    {
-    //    //        action();
-    //    //        return null;
-    //    //    }, retryInterval, maxAttemptCount);
-    //    //}
+    public class SchedulareComparer : IComparer<SchedulareState>
+    {
+        public int Compare(SchedulareState schedulareA, SchedulareState schedulareB)
+        {
 
-    //    //public static T Do<T>(
-    //    //    Func<T> action,
-    //    //    TimeSpan retryInterval,
-    //    //    int maxAttemptCount = 3)
-    //    //{
-    //    //    var exceptions = new List<Exception>();
+            if (schedulareA.Weight == schedulareB.Weight)
+            {
+                return 0;
+            }
+            else if (schedulareA.Weight > schedulareB.Weight)
+            {
+                return 1;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+    public class SchedulareComparerArray : IComparer<SchedulareState>
+    {
+        public int Compare(SchedulareState schedulareA, SchedulareState schedulareB)
+        {
+            if (schedulareA == schedulareB)
+                return 0;
 
-    //    //    for (int attempted = 0; attempted < maxAttemptCount; attempted++)
-    //    //    {
-    //    //        try
-    //    //        {
-    //    //            if (attempted > 0)
-    //    //            {
-    //    //                Thread.Sleep(retryInterval);
-    //    //            }
-    //    //            return action();
-    //    //        }
-    //    //        catch (Exception ex)
-    //    //        {
-    //    //            exceptions.Add(ex);
-    //    //        }
-    //    //    }
-    //    //    throw new AggregateException(exceptions);
-    //    //}
+            if (schedulareA.Weight == schedulareB.Weight)
+                return 1;
 
-    //    //public static bool RetryTwo(int numberOfRetries, Func<bool> method)
-    //    //{
-    //    //    if (numberOfRetries > 0)
-    //    //    {
-    //    //        try
-    //    //        {
-    //    //            var test = method();
-    //    //            return test;
-    //    //        }
-    //    //        catch (Exception e)
-    //    //        {
-    //    //            // Log the exception
-    //    //            Console.WriteLine(e);
+            else if (schedulareA.Weight > schedulareB.Weight)
+                return 1;
 
-    //    //            // wait half a second before re-attempting. 
-    //    //            // should be configurable, it's hard coded just for the example.
-    //    //            Thread.Sleep(500);
-
-    //    //            // retry
-    //    //            return RetryTwo(--numberOfRetries, method);
-    //    //        }
-    //    //    }
-    //    //    return false;
-    //    //}
-
-    
-    //}
+            else
+                return -1;
+        }
+    }
 }
+
