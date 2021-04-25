@@ -67,6 +67,8 @@ namespace Engine.Algorithms
                 {
                     foreach (var worker in shift.Workers)
                     {
+                        if (worker.Name.IsNullOrEmpty()) continue;
+
                         if (IswantedShift(schedulare, shiftsContainer, worker.Name, day.Name, shift))
                         {
                             count++;
@@ -102,7 +104,7 @@ namespace Engine.Algorithms
                 {
                     var day = (DayOfWeek)dayI;
                     var dayString = day.ToString();
-                    list.Add(string.Join(",", data[dayI][i].Workers.Select(y => IswantedShift(value, shiftsContainer, y.Name, dayString, data[dayI][i]) ? y.Name : $"{y.Name} X").ToList()));
+                    list.Add(string.Join(",", data[dayI][i].Workers.Where(x=>!x.Name.IsNullOrEmpty()).Select(y => IswantedShift(value, shiftsContainer, y.Name, dayString, data[dayI][i]) ? y.Name : $"{y.Name} X").ToList()));
                 }
 
                 var obj = new Week(list);
