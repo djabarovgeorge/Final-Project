@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Engine.Models
 {
+    [Serializable]
     public class TreeNode<T>
     {
         private readonly T _value;

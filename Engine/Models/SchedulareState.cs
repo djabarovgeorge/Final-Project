@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Engine.Models
 {
+    [Serializable]
     public class SchedulareState
     {
         //public Schedulare Schedulare { get; set; }
