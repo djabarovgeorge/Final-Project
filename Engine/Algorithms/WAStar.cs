@@ -11,7 +11,7 @@ namespace Engine.Algorithms
     public class WAStar : HeuristicAlgoBase
     {
 
-        private const double ALFA = 0.95;
+        private const double ALFA = 0.55;
         private double _threshold;
         public override Schedulare Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
         {
@@ -29,8 +29,6 @@ namespace Engine.Algorithms
 
             var closeSet = new SortedArray<SchedulareState>(new SchedulareComparerArray());
 
-            TreeNode<Schedulare> result = null;
-
             while (!openSet.IsNullOrEmpty())
             {
                 var currState = GetCurrentState(openSet);
@@ -45,7 +43,7 @@ namespace Engine.Algorithms
 
                 PrintDebugData(shiftsContainer, currState);
 
-                if (IsGoal())
+                if (IsGoal() && IsSchedulareFull(currNode.Value, shiftsContainer))
                 {
                     UpdateCurrentBestSolution(currState);
                     break;
@@ -55,6 +53,7 @@ namespace Engine.Algorithms
                 // remove the node from open list and look for another solutions
                 if (IsSchedulareFull(currNode.Value, shiftsContainer))
                 {
+                    UpdateCurrentBestSolution(currState);
                     openSet.Remove(currState);
                     closeSet.Add(currState);
                     continue;
@@ -88,7 +87,7 @@ namespace Engine.Algorithms
 
             PrintDebugData(shiftsContainer, CurrentBestSolution);
 
-            return result.Value;
+            return CurrentBestSolution.Node.Value;
         }
         protected override void PrintDebugData(ShiftsContainer shiftsContainer, SchedulareState state)
         {

@@ -267,15 +267,6 @@ namespace Engine.Algorithms
             return CurrentBestSolution.Node.Value;
         }
 
-        private DayShift GetRandomShift(List<DayShift> shiftsList)
-        {
-            var random = new Random();
-
-            var randNumber = random.Next(0, shiftsList.Count - 1);
-
-            return shiftsList[randNumber];
-        }
-
         private List<DayShift> GetShiftList(Schedulare value)
         {
             var shiftsList = value.Days.SelectMany(x => x.Shifts).ToList();

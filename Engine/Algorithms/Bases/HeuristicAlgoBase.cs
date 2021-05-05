@@ -32,6 +32,7 @@ namespace Engine.Algorithms.Bases
             if (timer.Elapsed.TotalSeconds > ALGORITHM_RUN_TIME_SECONDS)
             {
                 timer.Stop();
+                timer.Reset();
                 return true;
             }
 
@@ -157,7 +158,7 @@ namespace Engine.Algorithms.Bases
 
         protected Shift GetIncompleteShift(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
-            var incompleteShiftList = GetInvalidShiftsList(schedulare, shiftsContainer);
+            var incompleteShiftList = GetIncompleteShiftList(schedulare, shiftsContainer);
 
             return incompleteShiftList.FirstOrDefault();
         }
@@ -171,24 +172,25 @@ namespace Engine.Algorithms.Bases
             return incompleteShiftCount.Equals(0);
         }
 
+        //protected static List<Shift> GetIncompleteShiftList(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        //{
+        //    var shiftsList = schedulare.Days.SelectMany(x => x.Shifts).ToList();
+
+        //    var numberOfWorkersInShift = shiftsContainer.ShiftParams.NumberOfWokersInShift;
+
+        //    var unmannedShifts = shiftsList.Where(x => !x.Workers.Count.Equals(numberOfWorkersInShift)).ToList();
+
+        //    return unmannedShifts;
+        //}
+
         protected static List<Shift> GetIncompleteShiftList(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
             var shiftsList = schedulare.Days.SelectMany(x => x.Shifts).ToList();
 
             var numberOfWorkersInShift = shiftsContainer.ShiftParams.NumberOfWokersInShift;
 
-            var unmannedShifts = shiftsList.Where(x => !x.Workers.Count.Equals(numberOfWorkersInShift)).ToList();
-
-            return unmannedShifts;
-        }
-
-        protected static List<Shift> GetInvalidShiftsList(Schedulare schedulare, ShiftsContainer shiftsContainer)
-        {
-            var shiftsList = schedulare.Days.SelectMany(x => x.Shifts).ToList();
-
-            var numberOfWorkersInShift = shiftsContainer.ShiftParams.NumberOfWokersInShift;
-
-            var unmannedShifts = shiftsList.Where(x => !x.Workers.Where(y => y.Name.IsNullOrEmpty()).ToList().Count.Equals(0)).ToList();
+            var unmannedShifts = shiftsList.Where(x => !x.Workers.Where(y => y.Name.IsNullOrEmpty()).ToList().Count.Equals(0) ||
+                                                    x.Workers.Count < numberOfWorkersInShift).ToList();
 
             return unmannedShifts;
         }
@@ -210,6 +212,25 @@ namespace Engine.Algorithms.Bases
             UnwantedShift(schedulare, shiftsContainer, ref weight);
 
             return new SchedulareState() { Node = treeNode, Weight = weight };
+        }
+        protected Shift GetRandomIncompleteShift(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        {
+            var incompleteShiftList = GetIncompleteShiftList(schedulare, shiftsContainer);
+
+            var random = new Random();
+
+            var randNumber = random.Next(0, incompleteShiftList.Count - 1);
+
+            return incompleteShiftList[randNumber];
+        }
+
+        protected DayShift GetRandomShift(List<DayShift> shiftsList)
+        {
+            var random = new Random();
+
+            var randNumber = random.Next(0, shiftsList.Count - 1);
+
+            return shiftsList[randNumber];
         }
         protected static void PrintTree(TreeNode<Schedulare> root, SchedulareState currState)
         {

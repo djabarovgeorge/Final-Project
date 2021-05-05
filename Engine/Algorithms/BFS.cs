@@ -39,7 +39,7 @@ namespace Engine.Algorithms
 
                 var currNode = currState.Node;
 
-                if (IsGoal())
+                if (IsGoal() && IsSchedulareFull(currNode.Value, shiftsContainer))
                 {
                     UpdateCurrentBestSolution(currState);
                     break;
