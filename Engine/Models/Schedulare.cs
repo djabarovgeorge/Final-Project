@@ -76,4 +76,33 @@ namespace Engine.Models
     {
         public string Name { get; set; }
     }
+
+
+    public class SchedulareSatisfaction
+    {
+        public Schedulare Schedulare { get; set; }
+        public double Satisfaction { get; set; }
+        public ShiftsContainer ShiftsContainer { get; }
+        public double Weight { get; set; }
+
+        public SchedulareSatisfaction(Schedulare schedulare, double satisfaction, ShiftsContainer shiftsContainer, double weight)
+        {
+            Schedulare = schedulare;
+            Satisfaction = satisfaction;
+            ShiftsContainer = shiftsContainer;
+            Weight = weight;
+        }
+    }
+
+    public class SchedulareListStatistics
+    {
+        public SchedulareListStatistics()
+        {
+            SchedulareSatisfactionList = new List<SchedulareSatisfaction>();
+            SatisfactionAvarage = 0;
+        }
+
+        public List<SchedulareSatisfaction> SchedulareSatisfactionList { get; set; }
+        public double SatisfactionAvarage { get; set; }
+    }
 }

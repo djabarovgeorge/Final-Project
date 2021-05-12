@@ -13,7 +13,7 @@ namespace Engine.Algorithms
 
         private const double ALFA = 0.55;
         private double _threshold;
-        public override Schedulare Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
+        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
         {
             UpdateWeights(weightContainer);
 
@@ -38,8 +38,6 @@ namespace Engine.Algorithms
                 closeSet.Add(currState);
 
                 var currNode = currState.Node;
-
-                var sat = CommonLogic.GetPercentageOfSatisfaction(currNode.Value, shiftsContainer);
 
                 PrintDebugData(shiftsContainer, currState);
 
@@ -87,10 +85,18 @@ namespace Engine.Algorithms
 
             PrintDebugData(shiftsContainer, CurrentBestSolution);
 
-            return CurrentBestSolution.Node.Value;
+            var ret = CurrentBestSolution;
+
+            CurrentBestSolution = null;
+            IsFinished = false;
+
+            return ret;
         }
+
         protected override void PrintDebugData(ShiftsContainer shiftsContainer, SchedulareState state)
         {
+            if (!DEBUG) return;
+
             Console.WriteLine($"_threshold - {_threshold}");
             base.PrintDebugData(shiftsContainer, state);
         }

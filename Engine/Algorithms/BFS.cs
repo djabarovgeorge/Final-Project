@@ -10,7 +10,7 @@ namespace Engine.Algorithms
 {
     public class BFS : HeuristicAlgoBase
     {
-        public override Schedulare Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
+        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
         {
 
             UpdateWeights(weightContainer);
@@ -85,7 +85,12 @@ namespace Engine.Algorithms
             // DEBUG
             PrintDebugData(shiftsContainer, CurrentBestSolution);
 
-            return result.Value;
+            var ret = CurrentBestSolution;
+
+            CurrentBestSolution = null;
+            IsFinished = false;
+
+            return ret;
         }
     }
 }

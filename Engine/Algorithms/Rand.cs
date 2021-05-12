@@ -12,7 +12,7 @@ namespace Engine.Algorithms
         private List<Worker> _workersBackLog = new List<Worker>();
         private List<Day> _unresolvedShifts = new List<Day>();
 
-        public void Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        public Schedulare Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
             // step 1 init with all the constrains
             InitialTheSchedular(schedulare, shiftsContainer);
@@ -25,6 +25,7 @@ namespace Engine.Algorithms
             // step 3 resolve conflicts from previous step
             ResolveAndFillTheSchdulare(schedulare, shiftsContainer);
 
+            return schedulare;
         }
 
         private void ResolveAndFillTheSchdulare(Schedulare schedulare, ShiftsContainer shiftsContainer)

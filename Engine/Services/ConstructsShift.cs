@@ -25,8 +25,8 @@ namespace Engine.Services
 
         public override ShiftsContainer Excute()
         {
-            if(!isInitialized)
-                GenerateShiftParams();
+            //if(!isInitialized)
+            GenerateShiftParams();
 
             var handler = new ConstraintsHandler(NumberOfWorkers, NumberOfDaysOfWork, NumberOfShiftsInDay, NumberOfWokersInShift);
 
@@ -101,7 +101,7 @@ namespace Engine.Services
             var randIndex = GenerateRandomNumberInRange(0, listOfPosibleParams.Count);
 
             #region Debug the smallest combination
-            randIndex = 5;
+            //randIndex = 5;
             #endregion
 
             SetNumberOfDaysOfWork(listOfPosibleParams[randIndex][0]);
