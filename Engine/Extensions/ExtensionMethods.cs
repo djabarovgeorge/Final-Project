@@ -9,6 +9,7 @@ namespace Engine.Extensions
     {
         public static T DeepClone<T>(this T a)
         {
+
             using (MemoryStream stream = new MemoryStream())
             {
                 BinaryFormatter formatter = new BinaryFormatter();

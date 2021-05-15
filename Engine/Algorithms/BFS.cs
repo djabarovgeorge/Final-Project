@@ -10,34 +10,30 @@ namespace Engine.Algorithms
 {
     public class BFS : HeuristicAlgoBase
     {
+        public IntervalHeap<SchedulareState> CloseSet { get; private set; }
+        public IntervalHeap<SchedulareState> OpenSet { get; private set; }
+
         public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
         {
+            InitParams(schedulare, shiftsContainer, weightContainer);
 
-            UpdateWeights(weightContainer);
+            var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, TreeRoot);
 
-            var openSet = new IntervalHeap<SchedulareState>(new SchedulareComparer());
+            OpenSet.Add(schedulareState);
 
-            var root = new TreeNode<Schedulare>(schedulare);
+            ExecuteStopwatch.Start();
 
-            var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, root);
-
-            openSet.Add(schedulareState);
-
-            var closeSet = new IntervalHeap<SchedulareState>(new SchedulareComparer());
-
-            TreeNode<Schedulare> result = null;
-
-            while (!openSet.IsEmpty)
+            while (!OpenSet.IsEmpty)
             {
+                var currState = OpenSet.FindMin();
 
-                var currState = openSet.FindMin();
+                OpenSet.DeleteMin();
 
-                #region Update queue sets
-                openSet.DeleteMin();
-                closeSet.Add(currState);
-                #endregion
+                CloseSet.Add(currState);
 
                 var currNode = currState.Node;
+
+                UpdateCurrentBestSolution(currState);
 
                 if (IsGoal() && IsSchedulareFull(currNode.Value, shiftsContainer))
                 {
@@ -52,8 +48,8 @@ namespace Engine.Algorithms
                 // remove the node from open list and look for another solutions
                 if (IsSchedulareFull(currNode.Value, shiftsContainer))
                 {
-                    openSet.DeleteMin();
-                    closeSet.Add(currState);
+                    OpenSet.DeleteMin();
+                    CloseSet.Add(currState);
                     continue;
                 }
 
@@ -76,7 +72,7 @@ namespace Engine.Algorithms
                     var newNodeState = GetSchedulareState(newNodeSchedulare, shiftsContainer, childNode);
 
                     // add new state to openSet
-                    openSet.Add(newNodeState);
+                    OpenSet.Add(newNodeState);
                 }
 
                 #endregion
@@ -89,8 +85,22 @@ namespace Engine.Algorithms
 
             CurrentBestSolution = null;
             IsFinished = false;
+            ExecuteStopwatch.Reset();
 
             return ret;
+        }
+
+        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer)
+        {
+            ShiftsContainer = shiftsContainer;
+
+            UpdateWeights(weightContainer);
+
+            CloseSet = new IntervalHeap<SchedulareState>(new SchedulareComparer());
+
+            OpenSet = new IntervalHeap<SchedulareState>(new SchedulareComparer());
+
+            TreeRoot = new TreeNode<Schedulare>(schedulare);
         }
     }
 }

@@ -84,25 +84,30 @@ namespace Engine.Models
         public double Satisfaction { get; set; }
         public ShiftsContainer ShiftsContainer { get; }
         public double Weight { get; set; }
+        public double ExecuteTime { get; set; }
 
-        public SchedulareSatisfaction(Schedulare schedulare, double satisfaction, ShiftsContainer shiftsContainer, double weight)
+        public SchedulareSatisfaction(Schedulare schedulare, double satisfaction, ShiftsContainer shiftsContainer, double weight, double executeTime)
         {
             Schedulare = schedulare;
             Satisfaction = satisfaction;
             ShiftsContainer = shiftsContainer;
             Weight = weight;
+            ExecuteTime = executeTime;
         }
     }
 
     public class SchedulareListStatistics
     {
+        public List<SchedulareSatisfaction> SchedulareSatisfactionList { get; set; }
+        public double SatisfactionAvarage { get; set; }
+        public double WeightAvarage { get; set; }
+        public double ExecuteTimeAvarage { get; set; }
         public SchedulareListStatistics()
         {
             SchedulareSatisfactionList = new List<SchedulareSatisfaction>();
             SatisfactionAvarage = 0;
+            WeightAvarage = 0;
+            ExecuteTimeAvarage = 0;
         }
-
-        public List<SchedulareSatisfaction> SchedulareSatisfactionList { get; set; }
-        public double SatisfactionAvarage { get; set; }
     }
 }

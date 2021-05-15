@@ -12,8 +12,18 @@ namespace Engine.Algorithms
     public static class CommonLogic
     {
         private const string LOG_PATH = "d:\\huristicdata\\{0}.txt";
-        private const string FILENAME = "algostat";
-        private static bool IsFirstRun = true;
+        private static string FileName = "algostat";
+        private static int FileSuffix { get; set; }
+
+        public static void InitFileSuffix()
+        {
+            var count = 0;
+
+            while (File.Exists(GetFilePath(FileName, count)))
+                count++;
+
+            FileSuffix = count;
+        }
 
         public static bool IsValidToAssign(Schedulare _schedulare, Day _schedulareDay, Shift _schedulareShift, Worker _randomEmployee)
         {
@@ -198,17 +208,9 @@ namespace Engine.Algorithms
             }
             return false;
         }
-        public static void ApeandToFile(string str , string fileName = FILENAME)
+        public static void ApeandToFile(string str , string fileName = "algostat")
         {
-            var count = 0;
-            if(IsFirstRun)
-            {
-                while (File.Exists(GetFilePath(fileName, count)))
-                    count++;
-                IsFirstRun = false;
-            }
-
-            File.AppendAllText($"{GetFilePath(fileName, count)}", str + Environment.NewLine);
+            File.AppendAllText(GetFilePath(fileName, FileSuffix), str + Environment.NewLine);
         }
 
         private static string GetFilePath(string fileName, int count)

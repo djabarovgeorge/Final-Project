@@ -14,20 +14,22 @@ namespace Engine.Algorithms
     {
         protected readonly int EXPLORATION_TIME_SECONDS = 2;
 
+        public CircularList CloseSet { get; set; }
+        public IntervalHeap<SchedulareState> OpenSet { get; private set; }
+        private Stopwatch ExplorationStopwatch { get; set; }
+
+
         public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
         {
+            InitParams(schedulare, shiftsContainer, weightContainer);
 
-            UpdateWeights(weightContainer);
-
-            var root = new TreeNode<Schedulare>(schedulare);
-
-            var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, root);
+            var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, TreeRoot);
 
             UpdateCurrentBestSolution(schedulareState);
 
-            var closeSet = new CircularList(20);
+            OpenSet.Add(schedulareState);
 
-            var timer = new Stopwatch();
+            ExecuteStopwatch.Start();
 
             var shiftsList = GetShiftList(schedulareState.Node.Value);
 
@@ -35,55 +37,40 @@ namespace Engine.Algorithms
             {
                 var randShift = GetRandomShift(shiftsList);
 
-                var currExplorationState = CurrentBestSolution.DeepClone();
-
-                var openSet = new IntervalHeap<SchedulareState>(new SchedulareComparer()) { currExplorationState };
-
                 // DEBUG 
-                PrintDebugData(shiftsContainer, currExplorationState);
+                PrintDebugData(shiftsContainer, CurrentBestSolution);
 
-                timer.Reset();
-                timer.Start();
+                ExplorationStopwatch.Reset();
+
+                ExplorationStopwatch.Start();
 
                 #region Exploration loop
 
-                while (timer.Elapsed.TotalSeconds < EXPLORATION_TIME_SECONDS)
+                while (ExplorationStopwatch.Elapsed.TotalSeconds < EXPLORATION_TIME_SECONDS)
                 {
-
                     // IsGoal
-                    if (IsGoal()) break;
+                    // OR break id exploration ended with no result
+                    if (IsGoal() || OpenSet.Count.Equals(0)) break;
 
-                    // break id exploration ended with no result
-                    if (openSet.Count.Equals(0))
-                        break;
-
-                    var currState = openSet.FindMin();
+                    var currState = OpenSet.FindMin();
 
                     UpdateCurrentBestSolution(currState);
 
-                    #region Update queue sets
-                    openSet.DeleteMin();
-                    closeSet.Add(currState.Node.Value);
-                    #endregion
+                    OpenSet.DeleteMin();
+
+                    CloseSet.Add(currState.Node.Value);
 
 
                     for (int workerIndex = 0; workerIndex < randShift.Shift.Workers.Count; workerIndex++)
                     {
-
                         var currStateInOrderToReplaceEmp = currState.DeepClone();
 
                         var currStateNodeInOrderToReplaceEmp = currStateInOrderToReplaceEmp.Node;
 
-                        // remove emp from current solution to explore better solution
-                        var currShiftDay = currStateInOrderToReplaceEmp.Node.Value.Days.FirstOrDefault(x => x.Name.CompareContent(randShift.DayName));
-                        var currShift = currShiftDay.Shifts.FirstOrDefault(x => x.Name.CompareContent(randShift.Shift.Name));
-                        currShift.Workers[workerIndex] = new Worker() { Name = string.Empty };
+                        RemoveEmpFromCurrShift(randShift, workerIndex, currStateInOrderToReplaceEmp);
 
                         // DEBUG 
-                        //PrintDebugData(shiftsContainer, currStateInOrderToReplaceEmp);
-
-                        #region HillClimbing
-                        // todo pass shift to assingh
+                        PrintDebugData(shiftsContainer, currStateInOrderToReplaceEmp);
 
                         #region build new nodes
                         foreach (var emp in shiftsContainer.EmployeeConstraints.Select(x => x.Name))
@@ -97,7 +84,7 @@ namespace Engine.Algorithms
                             currShiftToAssin.Workers.Add(new Worker() { Name = emp });
 
                             // validate if the new state in tabu list - is yes ignore it
-                            if (closeSet.Contains(newNodeSchedulare))
+                            if (CloseSet.Contains(newNodeSchedulare))
                             {
                                 if (!DEBUG) continue;
 
@@ -113,16 +100,15 @@ namespace Engine.Algorithms
                             var newNodeState = GetSchedulareState(newNodeSchedulare, shiftsContainer, childNode);
 
                             // add new state to openSet
-                            openSet.Add(newNodeState);
+                            OpenSet.Add(newNodeState);
 
                             // DEBUG 
                             PrintDebugData(shiftsContainer, newNodeState);
                         }
                         #endregion
-                        #endregion
                     }
                 }
-                timer.Stop();
+                ExplorationStopwatch.Stop();
 
                 #endregion
 
@@ -134,8 +120,32 @@ namespace Engine.Algorithms
 
             CurrentBestSolution = null;
             IsFinished = false;
+            ExecuteStopwatch.Reset();
 
             return ret;
+        }
+
+        private static void RemoveEmpFromCurrShift(DayShift randShift, int workerIndex, SchedulareState currStateInOrderToReplaceEmp)
+        {
+            // remove emp from current solution to explore better solution
+            var currShiftDay = currStateInOrderToReplaceEmp.Node.Value.Days.FirstOrDefault(x => x.Name.CompareContent(randShift.DayName));
+            var currShift = currShiftDay.Shifts.FirstOrDefault(x => x.Name.CompareContent(randShift.Shift.Name));
+            currShift.Workers[workerIndex] = new Worker() { Name = string.Empty };
+        }
+
+        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer)
+        {
+            UpdateWeights(weightContainer);
+
+            ShiftsContainer = shiftsContainer;
+
+            TreeRoot = new TreeNode<Schedulare>(schedulare);
+
+            CloseSet = new CircularList(20);
+
+            OpenSet = new IntervalHeap<SchedulareState>(new SchedulareComparer());
+
+            ExplorationStopwatch = new Stopwatch();
         }
 
         private List<DayShift> GetShiftList(Schedulare value)

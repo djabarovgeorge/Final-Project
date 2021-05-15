@@ -6,7 +6,6 @@ using Engine.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace Engine.Services
@@ -23,89 +22,99 @@ namespace Engine.Services
         private Dictionary<string, SchedulareListStatistics> _schedulareStatisticsList = new Dictionary<string, SchedulareListStatistics>();
         private const string FILENAME = "algodata";
 
-
-        private int EXECUTION_AMOUNT = 5;
-
-
+        public Manager()
+        {
+            CommonLogic.InitFileSuffix();
+        }
 
 
         public void Execute()
         {
-
-            for (int i = EXECUTION_AMOUNT; i < 1000; i+=1)
-            {
-                EXECUTION_AMOUNT = i;
-                RunCycle();
-            }
+            RunCycle();
 
         }
 
         private void RunCycle()
         {
-            CommonLogic.ApeandToFile($"EXECUTION_AMOUNT - {EXECUTION_AMOUNT}");
-            CommonLogic.ApeandToFile($"ALGORITHM_RUN_TIME_SECONDS - {60}");
-            Console.WriteLine($"EXECUTION_AMOUNT - {EXECUTION_AMOUNT}");
-            Console.WriteLine($"ALGORITHM_RUN_TIME_SECONDS - {60}");
 
-            for (int i = 0; i < EXECUTION_AMOUNT; i++)
+            for (int executionAmount = 1; executionAmount < 1000; executionAmount++)
             {
-                var shiftsContainer = _constructsShift.Excute();
+                CommonLogic.ApeandToFile($"EXECUTION_AMOUNT - {executionAmount}");
+                CommonLogic.ApeandToFile($"ALGORITHM_RUN_TIME_SECONDS - {120}");
+                Console.WriteLine($"EXECUTION_AMOUNT - {executionAmount}");
+                Console.WriteLine($"ALGORITHM_RUN_TIME_SECONDS - {120}");
 
-                var schedulare = new Schedulare(shiftsContainer);
+                RunHuristicMethods();
 
-                var bfsResult = _bfs.Execute(schedulare.DeepClone(), shiftsContainer);
+                UpdateSatisfactionAvarage();
 
-                //
-                Console.WriteLine($"bfsResult");
-                PrintDebugData(shiftsContainer, bfsResult);
-
-                UpdateSchefulareStatistics(shiftsContainer, bfsResult, "bfs");
-
-                var waStarResult = _waStar.Execute(schedulare.DeepClone(), shiftsContainer);
-
-                //
-                Console.WriteLine($"waStarResult");
-                PrintDebugData(shiftsContainer, waStarResult);
-
-                UpdateSchefulareStatistics(shiftsContainer, waStarResult, "waStar");
-
-                var randSchedular = _randAlgorithm.Execute(schedulare.DeepClone(), shiftsContainer);
-
-                var tabuResult = _tabu.Execute(randSchedular.DeepClone(), shiftsContainer);
-
-                //
-                Console.WriteLine($"tabuResult");
-                PrintDebugData(shiftsContainer, tabuResult);
-
-                UpdateSchefulareStatistics(shiftsContainer, tabuResult, "tabu");
-
-                var tabuRResult = _tabuR.Execute(randSchedular.DeepClone(), shiftsContainer);
-
-                //
-                Console.WriteLine($"tabuRResult");
-                PrintDebugData(shiftsContainer, tabuRResult);
-
-                UpdateSchefulareStatistics(shiftsContainer, tabuRResult, "tabuR");
+                PrintStats();
             }
-
-            foreach (var algoList in _schedulareStatisticsList)
-            {
-                algoList.Value.SatisfactionAvarage = algoList.Value.SchedulareSatisfactionList.Select(x => x.Satisfaction).Sum() / algoList.Value.SchedulareSatisfactionList.Count;
-            }
-
-            foreach (var algoList in _schedulareStatisticsList)
-            {
-                var algName = algoList.Key;
-                var algAvarage = algoList.Value.SatisfactionAvarage;
-
-                CommonLogic.ApeandToFile(algName);
-                CommonLogic.ApeandToFile(algAvarage.ToString());
-
-            }
-
             CommonLogic.ApeandToFile(string.Empty);
         }
 
+        private void RunHuristicMethods()
+        {
+            var shiftsContainer = _constructsShift.Excute();
+
+            var schedulare = new Schedulare(shiftsContainer);
+
+            var bfsResult = _bfs.Execute(schedulare.DeepClone(), shiftsContainer);
+
+            PrintDebugData(shiftsContainer, bfsResult, "BFS");
+
+            UpdateSchefulareStatistics(shiftsContainer, bfsResult, "BFS");
+
+            var waStarResult = _waStar.Execute(schedulare.DeepClone(), shiftsContainer);
+
+            PrintDebugData(shiftsContainer, waStarResult, "W A Star");
+
+            UpdateSchefulareStatistics(shiftsContainer, waStarResult, "WAStar");
+
+            var randSchedular = _randAlgorithm.Execute(schedulare.DeepClone(), shiftsContainer);
+
+            var tabuResult = _tabu.Execute(randSchedular.DeepClone(), shiftsContainer);
+
+            PrintDebugData(shiftsContainer, tabuResult, "TABU");
+
+            UpdateSchefulareStatistics(shiftsContainer, tabuResult, "TABU");
+
+            var tabuRResult = _tabuR.Execute(randSchedular.DeepClone(), shiftsContainer);
+
+            PrintDebugData(shiftsContainer, tabuRResult, "TABU Random");
+
+            UpdateSchefulareStatistics(shiftsContainer, tabuRResult, "TabuRandom");
+
+        }
+
+        private void PrintStats()
+        {
+            foreach (var algoList in _schedulareStatisticsList)
+            {
+                var algName = algoList.Key;
+
+                CommonLogic.ApeandToFile(algName);
+
+                CommonLogic.ApeandToFile($"Satisfaction Avarage = {algoList.Value.SatisfactionAvarage}");
+
+                CommonLogic.ApeandToFile($"Weight Avarage = {algoList.Value.WeightAvarage}");
+
+                CommonLogic.ApeandToFile($"Execute Time Avarage = {algoList.Value.ExecuteTimeAvarage}");
+            }
+
+            CommonLogic.ApeandToFile(string.Empty);
+
+        }
+
+        private void UpdateSatisfactionAvarage()
+        {
+            foreach (var algoList in _schedulareStatisticsList)
+            {
+                algoList.Value.SatisfactionAvarage = algoList.Value.SchedulareSatisfactionList.Select(x => x.Satisfaction).Sum() / algoList.Value.SchedulareSatisfactionList.Count;
+                algoList.Value.WeightAvarage = algoList.Value.SchedulareSatisfactionList.Select(x => x.Weight).Sum() / algoList.Value.SchedulareSatisfactionList.Count;
+                algoList.Value.ExecuteTimeAvarage = algoList.Value.SchedulareSatisfactionList.Select(x => x.ExecuteTime).Sum() / algoList.Value.SchedulareSatisfactionList.Count;
+            }
+        }
 
         private void UpdateSchefulareStatistics(ShiftsContainer shiftsContainer, SchedulareState algoResult, string algoString)
         {
@@ -114,18 +123,18 @@ namespace Engine.Services
                 _schedulareStatisticsList.AddOrUpdate(algoString, new SchedulareListStatistics());
             }
             var bfsSatisfaction = CommonLogic.GetPercentageOfSatisfaction(algoResult.Node.Value, shiftsContainer);
-            _schedulareStatisticsList[algoString].SchedulareSatisfactionList.Add(new SchedulareSatisfaction(algoResult.Node.Value, bfsSatisfaction, shiftsContainer, algoResult.Weight));
+            _schedulareStatisticsList[algoString].SchedulareSatisfactionList.Add(new SchedulareSatisfaction(algoResult.Node.Value, bfsSatisfaction, shiftsContainer, algoResult.Weight, algoResult.ExecuteTime));
         }
 
-        private void PrintDebugData(ShiftsContainer shiftsContainer, SchedulareState state)
+        private void PrintDebugData(ShiftsContainer shiftsContainer, SchedulareState state,string algoName)
         {
-
+            Console.WriteLine(algoName);
             double percentageOfSatisfaction = CommonLogic.GetPercentageOfSatisfaction(state.Node.Value, shiftsContainer);
             Console.WriteLine($"Weight = {state.Weight}");
             Console.WriteLine($"Satisfaction = {percentageOfSatisfaction}");
             CommonLogic.PrintSchedulare(state.Node.Value, shiftsContainer);
 
-
+            CommonLogic.ApeandToFile(algoName, FILENAME);
             CommonLogic.ApeandToFile($"Weight = {state.Weight}", FILENAME);
             CommonLogic.ApeandToFile($"Satisfaction = {percentageOfSatisfaction}", FILENAME);
             string schedulareStateJson = JsonConvert.SerializeObject(state.Node.Value);

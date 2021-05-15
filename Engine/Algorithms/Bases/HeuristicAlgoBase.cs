@@ -1,4 +1,5 @@
-﻿using Engine.Extensions;
+﻿using C5;
+using Engine.Extensions;
 using Engine.Interfaces;
 using Engine.Models;
 using System;
@@ -10,18 +11,22 @@ namespace Engine.Algorithms.Bases
 {
     public abstract class HeuristicAlgoBase : IAlgo
     {
-        private readonly int ALGORITHM_RUN_TIME_SECONDS = 60;
+        private readonly int ALGORITHM_RUN_TIME_SECONDS = 120;
         protected const bool DEBUG = false;
 
         private readonly Stopwatch timer = new Stopwatch();
+        protected readonly Stopwatch ExecuteStopwatch = new Stopwatch();
 
         protected int _twoShiftsInARowWeight = 10;
         protected int _lackSatisfactionConstraintsWeight = 40;
         protected int _shiftsInARow = 20;
         protected int _unwantedShift = 20;
-        protected int _twiceOnTheSameShift = 20;
+        protected int _twiceOnTheSameShift = 50;
+
         protected bool IsFinished = false;
-        
+
+        protected ShiftsContainer ShiftsContainer;
+        protected TreeNode<Schedulare> TreeRoot { get;  set; }
         protected SchedulareState CurrentBestSolution { get; set; }
 
 
@@ -71,10 +76,19 @@ namespace Engine.Algorithms.Bases
         protected void UpdateCurrentBestSolution(SchedulareState currState)
         {
             if (CurrentBestSolution == null)
+            {
                 CurrentBestSolution = currState;
+                CurrentBestSolution.ExecuteTime = ExecuteStopwatch.Elapsed.TotalSeconds;
+            }
+
+            // update only if the schedulare is full
+            if (!IsSchedulareFull(currState.Node.Value, ShiftsContainer)) return;
 
             else if (currState.Weight < CurrentBestSolution.Weight)
+            {
                 CurrentBestSolution = currState;
+                CurrentBestSolution.ExecuteTime = ExecuteStopwatch.Elapsed.TotalSeconds;
+            }
         }
 
         protected void UpdateWeights(WeightContainer weightContainer)

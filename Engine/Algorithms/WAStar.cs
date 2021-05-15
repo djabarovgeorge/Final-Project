@@ -11,37 +11,40 @@ namespace Engine.Algorithms
     public class WAStar : HeuristicAlgoBase
     {
 
-        private const double ALFA = 0.55;
+        private const double ALFA = 1.0001;
         private double _threshold;
+        private bool _isWithTH = false;
+
+        public SortedArray<SchedulareState> OpenSet { get; private set; }
+        public SortedArray<SchedulareState> CloseSet { get; private set; }
+
         public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
         {
-            UpdateWeights(weightContainer);
+            InitParams(schedulare, shiftsContainer, weightContainer);
 
-            var openSet = new SortedArray<SchedulareState>(new SchedulareComparerArray());
+            var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, TreeRoot);
 
-            var root = new TreeNode<Schedulare>(schedulare);
+            OpenSet.Add(schedulareState);
 
-            var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, root);
-
-            openSet.Add(schedulareState);
+            ExecuteStopwatch.Start();
 
             UpdateThreshold(schedulareState);
 
-            var closeSet = new SortedArray<SchedulareState>(new SchedulareComparerArray());
-
-            while (!openSet.IsNullOrEmpty())
+            while (!OpenSet.IsNullOrEmpty())
             {
-                var currState = GetCurrentState(openSet);
+                var currState = GetCurrentState(OpenSet);
 
-                openSet.Remove(currState);
+                UpdateCurrentBestSolution(currState);
 
-                closeSet.Add(currState);
+                OpenSet.Remove(currState);
+
+                CloseSet.Add(currState);
 
                 var currNode = currState.Node;
 
                 PrintDebugData(shiftsContainer, currState);
 
-                if (IsGoal() && IsSchedulareFull(currNode.Value, shiftsContainer))
+                if (IsGoal())
                 {
                     UpdateCurrentBestSolution(currState);
                     break;
@@ -52,8 +55,8 @@ namespace Engine.Algorithms
                 if (IsSchedulareFull(currNode.Value, shiftsContainer))
                 {
                     UpdateCurrentBestSolution(currState);
-                    openSet.Remove(currState);
-                    closeSet.Add(currState);
+                    OpenSet.Remove(currState);
+                    CloseSet.Add(currState);
                     continue;
                 }
 
@@ -76,12 +79,11 @@ namespace Engine.Algorithms
                     var newNodeState = GetSchedulareState(newNodeSchedulare, shiftsContainer, childNode);
 
                     // add new state to openSet
-                    openSet.Add(newNodeState);
+                    OpenSet.Add(newNodeState);
                 }
 
                 #endregion
             }
-
 
             PrintDebugData(shiftsContainer, CurrentBestSolution);
 
@@ -89,8 +91,22 @@ namespace Engine.Algorithms
 
             CurrentBestSolution = null;
             IsFinished = false;
+            ExecuteStopwatch.Reset();
 
             return ret;
+        }
+
+        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer)
+        {
+            ShiftsContainer = shiftsContainer;
+
+            UpdateWeights(weightContainer);
+
+            OpenSet = new SortedArray<SchedulareState>(new SchedulareComparerArray());
+
+            TreeRoot = new TreeNode<Schedulare>(schedulare);
+
+            CloseSet = new SortedArray<SchedulareState>(new SchedulareComparerArray());
         }
 
         protected override void PrintDebugData(ShiftsContainer shiftsContainer, SchedulareState state)
@@ -104,9 +120,11 @@ namespace Engine.Algorithms
         {
             SchedulareState state = null;
 
-            // choose state only if it is not the the min (to cover more space)
-            //if(openSet.FirstOrDefault().Weight < _threshold)
-            //    state = openSet.FirstOrDefault(x=> x.Weight > _threshold);
+            if (!_isWithTH)
+            {
+                _isWithTH = true;
+                return openSet.FindMin();
+            }
 
             state = openSet.FirstOrDefault(x => x.Weight > _threshold);
 
@@ -117,13 +135,16 @@ namespace Engine.Algorithms
 
             UpdateThreshold(state);
 
+            _isWithTH = false;
             return state;
         }
 
         private void UpdateThreshold(SchedulareState state = null)
         {
             //_threshold = state != null? state.Weight -1 : _threshold - 1;
-            _threshold = state.Weight * ALFA;
+            //_threshold = state.Weight * ALFA;
+            _threshold = OpenSet.FirstOrDefault().Weight * ALFA;
+
         }
 
 
