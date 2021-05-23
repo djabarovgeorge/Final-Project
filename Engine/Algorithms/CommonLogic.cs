@@ -12,7 +12,7 @@ namespace Engine.Algorithms
     public static class CommonLogic
     {
         private const string LOG_PATH = "d:\\huristicdata\\{0}.txt";
-        private static string FileName = "algosummary";
+        private static string FileName = "algostat";
         private static int FileSuffix { get; set; }
 
         public static void InitFileSuffix()
@@ -208,7 +208,7 @@ namespace Engine.Algorithms
             }
             return false;
         }
-        public static void ApeandToFile(string str , string fileName = "algosummary")
+        public static void ApeandToFile(string str , string fileName = "algostat")
         {
             File.AppendAllText(GetFilePath(fileName, FileSuffix), str + Environment.NewLine);
         }
