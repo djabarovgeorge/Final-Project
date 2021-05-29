@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -54,6 +55,21 @@ namespace Engine.Extensions
             {
                 map.Add(key, value);
             }
+        }
+        // Return the standard deviation of an array of Doubles.
+        public static double StdDev(this IEnumerable<double> values)
+        {
+            // Get the mean.
+            double mean = values.Sum() / values.Count();
+
+            // Get the sum of the squares of the differences
+            // between the values and the mean.
+            var squares_query =
+                from double value in values
+                select (value - mean) * (value - mean);
+            double sum_of_squares = squares_query.Sum();
+
+            return Math.Sqrt(sum_of_squares / values.Count());
         }
 
     }

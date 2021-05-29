@@ -19,9 +19,9 @@ namespace Engine.Algorithms
         private Stopwatch ExplorationStopwatch { get; set; }
 
 
-        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
+        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
-            InitParams(schedulare, shiftsContainer, weightContainer);
+            InitParams(schedulare, shiftsContainer);
 
             var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, TreeRoot);
 
@@ -133,10 +133,8 @@ namespace Engine.Algorithms
             currShift.Workers[workerIndex] = new Worker() { Name = string.Empty };
         }
 
-        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer)
+        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
-            UpdateWeights(weightContainer);
-
             ShiftsContainer = shiftsContainer;
 
             TreeRoot = new TreeNode<Schedulare>(schedulare);

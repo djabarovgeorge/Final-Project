@@ -1,12 +1,15 @@
-﻿using Engine.Extensions;
+﻿using Engine.Algorithms.Bases;
+using Engine.Extensions;
+using Engine.Interfaces;
 using Engine.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Algorithms
 {
-    public class GreedyAlgorithm
+    public class GreedyAlgorithm : HeuristicAlgoBase
     {
 
         private Schedulare schedulare;
@@ -15,17 +18,30 @@ namespace Engine.Algorithms
         private List<GreedyEmployee> greedyEmpList;
         private List<GreedyEmployee> conflicts;
         private List<string> week = new List<string> { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+        protected readonly Stopwatch _executeStopwatch = new Stopwatch();
+        
 
-
-
-        public GreedyAlgorithm(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
-
             this.schedulare = schedulare;
             this.shiftsContainer = shiftsContainer;
             greedyEmpList = new List<GreedyEmployee>();
 
+            _executeStopwatch.Start();
 
+            StartAlgorithm();
+
+            var executionTime = _executeStopwatch.Elapsed.TotalSeconds;
+
+            _executeStopwatch.Reset();
+
+            conflicts = new List<GreedyEmployee>();
+
+            var schedulareState = GetSchedulareState(schedulare, shiftsContainer, new TreeNode<Schedulare>(schedulare));
+
+            schedulareState.ExecuteTime = executionTime;
+
+            return schedulareState;
         }
 
         public void StartAlgorithm()
@@ -33,7 +49,7 @@ namespace Engine.Algorithms
             PartOne();
             PartTwo();
             PartThree();
-            PrintAll();
+            //PrintAll();
 
         }
 
@@ -48,7 +64,7 @@ namespace Engine.Algorithms
 
                 var greedyEmploee = new GreedyEmployee() { Name = emp.Name };
 
-                Console.WriteLine("**1**");
+                //Console.WriteLine("**1**");
                 foreach (var empDay in emp.WeeklyConstraints)
                 {
                     if (empDay.Value.Contains("Free day")) continue;
@@ -73,11 +89,11 @@ namespace Engine.Algorithms
 
                         greedyEmploee.ShiftsThatWasNotAssigned.Add(shift);
                     }
-                    Console.WriteLine("**2**");
+                    //Console.WriteLine("**2**");
                 }
                 greedyEmpList.Add(greedyEmploee);
             }
-            PrintAll();
+            //PrintAll();
 
         }
 
@@ -93,15 +109,15 @@ namespace Engine.Algorithms
             //As long as there are employees who have more than one shift they have not received will continue
             while (conflicts.Count != 0 && iterations != shiftsContainer.ShiftParams.NumberOfWorkers)
             {
-                Console.WriteLine("**3**");
+                //Console.WriteLine("**3**");
 
                 foreach (var employeeCheck in conflicts)
                 {
-                    Console.WriteLine("**4**");
+                    //Console.WriteLine("**4**");
 
                     foreach (var iDontHaveThisDayList in employeeCheck.ShiftsThatWasNotAssigned.ToList())
                     {
-                        Console.WriteLine("**5**");
+                        //Console.WriteLine("**5**");
                         //Accept the day the constraint was not accepted.
                         var shiftDay = schedulare.Days.FirstOrDefault(x => x.Name.ContainsContent(iDontHaveThisDayList.Day));
 
@@ -123,7 +139,7 @@ namespace Engine.Algorithms
                         {
                             for (int i = 0; i < shift.Workers.Count; i++)
                             {
-                                Console.WriteLine("**6**");
+                                //Console.WriteLine("**6**");
                                 var checkIfIn = schedulare.Days[week.IndexOf(shiftDay.Name)].Shifts.Find(x => x.Name == shift.Name).Workers.Find(x => x.Name == employeeCheck.Name);
                                 var repleceWorker = schedulare.Days[week.IndexOf(shiftDay.Name)].Shifts.Find(x => x.Name == shift.Name).Workers[i].Name == luckyWorks.Name;
 
@@ -133,7 +149,7 @@ namespace Engine.Algorithms
 
                                     //Name of worker
 
-                                    this.PrintAll();
+                                    //this.PrintAll();
 
                                     var thisDay = week.IndexOf(shiftDay.Name);
 
@@ -150,7 +166,7 @@ namespace Engine.Algorithms
 
                                         if (item.Name == shift.Name)
                                         {
-                                            Console.WriteLine("**1**");
+                                            //Console.WriteLine("**1**");
                                             item.Workers[i].Name = employeeCheck.Name;
                                             break;
                                         }
@@ -159,9 +175,9 @@ namespace Engine.Algorithms
                                     //schedulare.Days[thisDay].Shifts.Find(x => x.Name == shift.Name).Workers[i].Name = employeeCheck.Name;
 
 
-                                    Console.WriteLine("***********************************After change****************");
+                                    //Console.WriteLine("***********************************After change****************");
 
-                                    this.PrintAll();
+                                    //this.PrintAll();
                                     //Subtract from the amount of constraints not received
                                     greedyEmpList.FirstOrDefault(x => x.Name == employeeCheck.Name).ShiftsThatWasNotAssigned.Remove(iDontHaveThisDayList);
 
@@ -185,7 +201,7 @@ namespace Engine.Algorithms
                 conflicts = greedyEmpList.Where(x => x.ShiftsThatWasNotAssigned.Count > 1).ToList();
                 iterations++;
             }
-            this.PrintAll();
+            //this.PrintAll();
         }
 
 
@@ -197,11 +213,11 @@ namespace Engine.Algorithms
             //Take one day in the schedulare
             for (int RunningOnTheDay = 0; RunningOnTheDay < schedulare.Days.Count; RunningOnTheDay++)
             {
-                Console.WriteLine("**7**");
+                //Console.WriteLine("**7**");
                 //The number of shifts per day
                 for (int RunOnShifts = 0; RunOnShifts < schedulare.Days[RunningOnTheDay].Shifts.Count; RunOnShifts++)
                 {
-                    Console.WriteLine("**8**");
+                    //Console.WriteLine("**8**");
                     //Is the number of shifts of employees smaller than the number of employees who are supposed to be on shift
                     while (schedulare.Days[RunningOnTheDay].Shifts[RunOnShifts].Workers.Count < shiftsContainer.ShiftParams.NumberOfWokersInShift)
                     {
@@ -209,7 +225,7 @@ namespace Engine.Algorithms
                         {
                             CheckIfFinish++;
                         }
-                        Console.WriteLine("**9**");
+                        //Console.WriteLine("**9**");
                         PartTwoNumTwo(RunningOnTheDay, RunOnShifts);
                         CheckIfFinish++;
 
@@ -228,7 +244,7 @@ namespace Engine.Algorithms
             //need to put all the worker
             for (int getEmployeesWithShift = 0; getEmployeesWithShift < greedyEmpList.Count; getEmployeesWithShift++)
             {
-                Console.WriteLine("**10**");
+                //Console.WriteLine("**10**");
                 var indexOfWorker = schedulare.Days[RunningOnTheDay].Shifts[RunOnShifts].Workers.FindIndex(x => x.Name == greedyEmpList[getEmployeesWithShift].Name);
 
                 if (indexOfWorker == -1 &&
@@ -283,7 +299,6 @@ namespace Engine.Algorithms
                 }
             }
         }
-
 
 
     }

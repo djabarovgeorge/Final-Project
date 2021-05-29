@@ -151,6 +151,49 @@ namespace Engine.Algorithms
             }
         }
 
+        public static double LocateAndPrintMostUnfortunateWorker(Schedulare schedulare, ShiftsContainer shiftsContainer)
+        {
+            var workerSatCount = new Dictionary<string, int>();
+            var constrainsCount = shiftsContainer.ShiftParams.NumberOfDaysOfWork;
+            try
+            {
+
+                foreach (var day in schedulare.Days)
+                {
+                    foreach (var shift in day.Shifts)
+                    {
+                        foreach (var worker in shift.Workers)
+                        {
+                            if (worker.Name.IsNullOrEmpty()) continue;
+
+                            if (IswantedShift(schedulare, shiftsContainer, worker.Name, day.Name, shift))
+                            {
+                                if (!workerSatCount.ContainsKey(worker.Name))
+                                    workerSatCount.TryAdd(worker.Name, 1);
+                                else
+                                    workerSatCount[worker.Name] = workerSatCount[worker.Name] + 1;
+                            }
+                        }
+                    }
+                }
+
+                if (!workerSatCount.IsNullOrEmpty())
+                { 
+                    var mostUnfortune = workerSatCount.Min(x=>x.Value);
+                    var mostUnfortunateWorkerPer = (double)Math.Round((float)mostUnfortune / (float)constrainsCount, 2);
+                    Console.WriteLine($"Most Unfortunate Worker got = {mostUnfortune} from {constrainsCount} constrains ({mostUnfortunateWorkerPer}%)");
+
+                    return mostUnfortunateWorkerPer;
+                }
+
+            }
+            catch (Exception e)
+            {
+                ApeandToFile(e.ToString());
+            }
+            return default;
+        }
+
         private static bool IswantedShift(Schedulare schedulare, ShiftsContainer shiftsContainer, string employeeName, string currDay, Shift shift)
         {
             try

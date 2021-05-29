@@ -1,31 +1,52 @@
-﻿using Engine.Extensions;
+﻿using Engine.Algorithms.Bases;
+using Engine.Extensions;
+using Engine.Interfaces;
 using Engine.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Algorithms
 {
-    public class Rand
+    public class Rand : HeuristicAlgoBase
     {
 
         private List<Worker> _workersBackLog = new List<Worker>();
         private List<Day> _unresolvedShifts = new List<Day>();
+        private Schedulare _schedulare;
+        private ShiftsContainer _shiftsContainer;
+        protected readonly Stopwatch _executeStopwatch = new Stopwatch();
 
-        public Schedulare Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
+
+        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
+            _schedulare = schedulare;
+            _shiftsContainer = shiftsContainer;
+
+            _executeStopwatch.Start();
+
+            _workersBackLog = new List<Worker>();
+            _unresolvedShifts = new List<Day>();
+
             // step 1 init with all the constrains
             InitialTheSchedular(schedulare, shiftsContainer);
-
 
             // step 2 validate shifts
             ValidateInitialStep(schedulare, shiftsContainer);
 
-
             // step 3 resolve conflicts from previous step
             ResolveAndFillTheSchdulare(schedulare, shiftsContainer);
 
-            return schedulare;
+            PrintDebugData(shiftsContainer, new SchedulareState() { Node = new TreeNode<Schedulare>(schedulare) });
+
+            _executeStopwatch.Reset();
+
+            var schedulareState = GetSchedulareState(schedulare, shiftsContainer, new TreeNode<Schedulare>(schedulare));
+
+            schedulareState.ExecuteTime = executionTime;
+
+            return schedulareState;
         }
 
         private void ResolveAndFillTheSchdulare(Schedulare schedulare, ShiftsContainer shiftsContainer)
@@ -55,7 +76,7 @@ namespace Engine.Algorithms
         private void AssignRandomEmployee(Schedulare schedulare, Day schedulareDay, Shift schedulareShift)
         {
             Func<Schedulare, Day, Shift, bool, bool> action = TryOrAssignEmployee;
-            var isAssined = CommonLogic.TryWithRetries(10, () => TryOrAssignEmployee(schedulare, schedulareDay, schedulareShift));
+            var isAssined = CommonLogic.TryWithRetries(20, () => TryOrAssignEmployee(schedulare, schedulareDay, schedulareShift));
 
             if (!isAssined) // failed to fill current shift 'schedulareShift'
             {
@@ -97,7 +118,7 @@ namespace Engine.Algorithms
                     List<Worker> fortuneWorkerList = InitializeFortuneWorkers(shift, fortuneWorkerIndexList);
 
                     var names = fortuneWorkerList.Select(x => x.Name).ToList();
-                    var workersThatWereRemoved = shift.Workers.Where(x => !names.Any(y => y.Contains(x.Name))).ToList();
+                    var workersThatWereRemoved = shift.Workers.Where(x => !names.Any(y => y.CompareContent(x.Name))).ToList();
 
                     //add workers what was not lucky to the back log
                     _workersBackLog.AddRange(workersThatWereRemoved);

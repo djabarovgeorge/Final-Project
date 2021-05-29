@@ -18,9 +18,9 @@ namespace Engine.Algorithms
         public SortedArray<SchedulareState> OpenSet { get; private set; }
         public SortedArray<SchedulareState> CloseSet { get; private set; }
 
-        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
+        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
-            InitParams(schedulare, shiftsContainer, weightContainer);
+            InitParams(schedulare, shiftsContainer);
 
             var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, TreeRoot);
 
@@ -96,11 +96,9 @@ namespace Engine.Algorithms
             return ret;
         }
 
-        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer)
+        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
             ShiftsContainer = shiftsContainer;
-
-            UpdateWeights(weightContainer);
 
             OpenSet = new SortedArray<SchedulareState>(new SchedulareComparerArray());
 

@@ -5,6 +5,8 @@ namespace Engine.Interfaces
 {
     public interface IAlgo
     {
-        SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null);
+        int ALGORITHM_RUN_TIME_SECONDS { get; }
+
+        SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer);
     }
 }

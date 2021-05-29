@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Nir\\Desktop\\Other\\לימודים שנה ד\\פרויקט גמר\\פרוייקט רעיון מספר 2\\code1\\Engine\\Engine.csproj": {}
+    "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\Engine.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Nir\\Desktop\\Other\\לימודים שנה ד\\פרויקט גמר\\פרוייקט רעיון מספר 2\\code1\\Engine\\Engine.csproj": {
+    "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\Engine.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Nir\\Desktop\\Other\\לימודים שנה ד\\פרויקט גמר\\פרוייקט רעיון מספר 2\\code1\\Engine\\Engine.csproj",
+        "projectUniqueName": "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\Engine.csproj",
         "projectName": "Engine",
-        "projectPath": "C:\\Users\\Nir\\Desktop\\Other\\לימודים שנה ד\\פרויקט גמר\\פרוייקט רעיון מספר 2\\code1\\Engine\\Engine.csproj",
-        "packagesPath": "C:\\Users\\Nir\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Nir\\Desktop\\Other\\לימודים שנה ד\\פרויקט גמר\\פרוייקט רעיון מספר 2\\code1\\Engine\\obj\\",
+        "projectPath": "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\Engine.csproj",
+        "packagesPath": "C:\\Users\\Gosha\\.nuget\\packages\\",
+        "outputPath": "D:\\Projects\\Final Project\\Source Code\\Engine\\Engine\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Nir\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Gosha\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,7 +26,6 @@
         },
         "frameworks": {
           "netcoreapp3.0": {
-            "targetAlias": "netcoreapp3.0",
             "projectReferences": {}
           }
         },
@@ -38,7 +37,6 @@
       },
       "frameworks": {
         "netcoreapp3.0": {
-          "targetAlias": "netcoreapp3.0",
           "dependencies": {
             "C5": {
               "target": "Package",
@@ -47,6 +45,18 @@
             "ConsoleTables": {
               "target": "Package",
               "version": "[2.4.2, )"
+            },
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Hosting.Abstractions": {
+              "target": "Package",
+              "version": "[5.0.0, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",
@@ -63,30 +73,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[3.0.1, 3.0.1]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[3.0.3, 3.0.3]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[3.0.0, 3.0.0]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[3.0.0, 3.0.0]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     }

@@ -85,14 +85,16 @@ namespace Engine.Models
         public ShiftsContainer ShiftsContainer { get; }
         public double Weight { get; set; }
         public double ExecuteTime { get; set; }
+        public double MostUnfortunateWorkerPer { get; private set; }
 
-        public SchedulareSatisfaction(Schedulare schedulare, double satisfaction, ShiftsContainer shiftsContainer, double weight, double executeTime)
+        public SchedulareSatisfaction(Schedulare schedulare, double satisfaction, ShiftsContainer shiftsContainer, double weight, double executeTime,double mostUnfortunateWorkerPer)
         {
             Schedulare = schedulare;
             Satisfaction = satisfaction;
             ShiftsContainer = shiftsContainer;
             Weight = weight;
             ExecuteTime = executeTime;
+            MostUnfortunateWorkerPer = mostUnfortunateWorkerPer;
         }
     }
 
@@ -102,12 +104,14 @@ namespace Engine.Models
         public double SatisfactionAvarage { get; set; }
         public double WeightAvarage { get; set; }
         public double ExecuteTimeAvarage { get; set; }
+        public double MostUnfortunateWorkerPerAvarage { get; set; }
         public SchedulareListStatistics()
         {
             SchedulareSatisfactionList = new List<SchedulareSatisfaction>();
             SatisfactionAvarage = 0;
             WeightAvarage = 0;
             ExecuteTimeAvarage = 0;
+            MostUnfortunateWorkerPerAvarage = 0;
         }
     }
 }

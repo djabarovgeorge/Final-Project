@@ -3,46 +3,49 @@ using Engine.Algorithms;
 using Engine.Extensions;
 using Engine.Interfaces;
 using Engine.Models;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Engine.Services
 {
-    class Manager
+    public class Manager : BackgroundService
     {
         private ShiftSetter _constructsShift = new ConstructsShift();
-        private Rand _randAlgorithm = new Rand();
-        private GreedyAlgorithm _greedyAlgorithm = new GreedyAlgorithm();
-        private readonly IAlgo _bfs = new BFS();
-        private readonly IAlgo _waStar = new WAStar();
-        private readonly IAlgo _tabu = new Tabu();
-        private readonly IAlgo _tabuR = new TabuR();
         private Dictionary<string, SchedulareListStatistics> _schedulareStatisticsList = new Dictionary<string, SchedulareListStatistics>();
+        private IFactory _factory;
         private const string FILENAME = "algodata";
-
+        public Manager(IFactory factory)
+        {
+            _factory = factory;
+        }
         public Manager()
         {
-            CommonLogic.InitFileSuffix();
         }
-
-
-        public void Execute()
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            CommonLogic.InitFileSuffix();
+
+            var shiftsContainer = _constructsShift.Excute();
+
+            var schedulare = new Schedulare(shiftsContainer);
+
+            var randResult = RunRandAlgo(shiftsContainer, schedulare);
+
             RunCycle();
 
+            return Task.FromResult(true);
         }
 
         private void RunCycle()
         {
-
             for (int executionAmount = 1; executionAmount < 1000; executionAmount++)
             {
-                CommonLogic.ApeandToFile($"EXECUTION_AMOUNT - {executionAmount}");
-                CommonLogic.ApeandToFile($"ALGORITHM_RUN_TIME_SECONDS - {120}");
-                Console.WriteLine($"EXECUTION_AMOUNT - {executionAmount}");
-                Console.WriteLine($"ALGORITHM_RUN_TIME_SECONDS - {120}");
+                PrintOnStartInfo(executionAmount);
 
                 RunHuristicMethods();
 
@@ -50,7 +53,16 @@ namespace Engine.Services
 
                 PrintStats();
             }
-            CommonLogic.ApeandToFile(string.Empty);
+        }
+
+        private void PrintOnStartInfo(int executionAmount)
+        {
+            var algoRunInSeconds = _factory.GetAll().FirstOrDefault().Value.ALGORITHM_RUN_TIME_SECONDS;
+
+            CommonLogic.ApeandToFile($"EXECUTION_AMOUNT - {executionAmount}");
+            CommonLogic.ApeandToFile($"ALGORITHM_RUN_TIME_SECONDS - {algoRunInSeconds}");
+            Console.WriteLine($"EXECUTION_AMOUNT - {executionAmount}");
+            Console.WriteLine($"ALGORITHM_RUN_TIME_SECONDS - {algoRunInSeconds}");
         }
 
         private void RunHuristicMethods()
@@ -59,32 +71,36 @@ namespace Engine.Services
 
             var schedulare = new Schedulare(shiftsContainer);
 
-            var bfsResult = _bfs.Execute(schedulare.DeepClone(), shiftsContainer);
+            var randResult = RunRandAlgo(shiftsContainer, schedulare);
 
-            PrintDebugData(shiftsContainer, bfsResult, "BFS");
+            foreach (var algo in _factory.GetAll())
+            {
+                RunAlgo(shiftsContainer, schedulare, randResult, algo);
+            }
+        }
 
-            UpdateSchefulareStatistics(shiftsContainer, bfsResult, "BFS");
+        private SchedulareState RunRandAlgo(ShiftsContainer shiftsContainer, Schedulare schedulare)
+        {
+            var randAlgo = _factory.GetAlgo("Rand");
+            var randResult = randAlgo.Execute(schedulare.DeepClone(), shiftsContainer);
+            PrintDebugData(shiftsContainer, randResult, randAlgo.ToString());
+            UpdateSchefulareStatistics(shiftsContainer, randResult, randAlgo.ToString());
+            return randResult;
+        }
 
-            var waStarResult = _waStar.Execute(schedulare.DeepClone(), shiftsContainer);
+        private void RunAlgo(ShiftsContainer shiftsContainer, Schedulare schedulare, SchedulareState randResult, KeyValuePair<string, IAlgo> algo)
+        {
+            SchedulareState result = null;
 
-            PrintDebugData(shiftsContainer, waStarResult, "W A Star");
+            if (algo.Key.ContainsContent("rand")) return;
 
-            UpdateSchefulareStatistics(shiftsContainer, waStarResult, "WAStar");
+            if (algo.Key.ContainsContent("tabu"))
+                result = algo.Value.Execute(randResult.Node.Value.DeepClone(), shiftsContainer);
+            else
+                result = algo.Value.Execute(schedulare.DeepClone(), shiftsContainer);
 
-            var randSchedular = _randAlgorithm.Execute(schedulare.DeepClone(), shiftsContainer);
-
-            var tabuResult = _tabu.Execute(randSchedular.DeepClone(), shiftsContainer);
-
-            PrintDebugData(shiftsContainer, tabuResult, "TABU");
-
-            UpdateSchefulareStatistics(shiftsContainer, tabuResult, "TABU");
-
-            var tabuRResult = _tabuR.Execute(randSchedular.DeepClone(), shiftsContainer);
-
-            PrintDebugData(shiftsContainer, tabuRResult, "TABU Random");
-
-            UpdateSchefulareStatistics(shiftsContainer, tabuRResult, "TabuRandom");
-
+            PrintDebugData(shiftsContainer, result, algo.Key.ToString());
+            UpdateSchefulareStatistics(shiftsContainer, result, algo.Key.ToString());
         }
 
         private void PrintStats()
@@ -97,9 +113,20 @@ namespace Engine.Services
 
                 CommonLogic.ApeandToFile($"Satisfaction Avarage = {algoList.Value.SatisfactionAvarage}");
 
+                var satStdDev = Math.Round(algoList.Value.SchedulareSatisfactionList.Select(x => x.Satisfaction).StdDev(), 3);
+
+                CommonLogic.ApeandToFile($"Satisfaction standard deviation = {satStdDev}");
+
                 CommonLogic.ApeandToFile($"Weight Avarage = {algoList.Value.WeightAvarage}");
 
+                var weightStdDev = Math.Round(algoList.Value.SchedulareSatisfactionList.Select(x => x.Weight).StdDev(), 3);
+
+                CommonLogic.ApeandToFile($"Weight standard deviation = {weightStdDev}");
+
                 CommonLogic.ApeandToFile($"Execute Time Avarage = {algoList.Value.ExecuteTimeAvarage}");
+
+                CommonLogic.ApeandToFile($"Most Unfortunate Worker Avarage = { Math.Round(algoList.Value.MostUnfortunateWorkerPerAvarage, 3 )}%");
+
             }
 
             CommonLogic.ApeandToFile(string.Empty);
@@ -113,6 +140,7 @@ namespace Engine.Services
                 algoList.Value.SatisfactionAvarage = algoList.Value.SchedulareSatisfactionList.Select(x => x.Satisfaction).Sum() / algoList.Value.SchedulareSatisfactionList.Count;
                 algoList.Value.WeightAvarage = algoList.Value.SchedulareSatisfactionList.Select(x => x.Weight).Sum() / algoList.Value.SchedulareSatisfactionList.Count;
                 algoList.Value.ExecuteTimeAvarage = algoList.Value.SchedulareSatisfactionList.Select(x => x.ExecuteTime).Sum() / algoList.Value.SchedulareSatisfactionList.Count;
+                algoList.Value.MostUnfortunateWorkerPerAvarage = algoList.Value.SchedulareSatisfactionList.Select(x => x.MostUnfortunateWorkerPer).Sum() / algoList.Value.SchedulareSatisfactionList.Count;
             }
         }
 
@@ -123,15 +151,17 @@ namespace Engine.Services
                 _schedulareStatisticsList.AddOrUpdate(algoString, new SchedulareListStatistics());
             }
             var bfsSatisfaction = CommonLogic.GetPercentageOfSatisfaction(algoResult.Node.Value, shiftsContainer);
-            _schedulareStatisticsList[algoString].SchedulareSatisfactionList.Add(new SchedulareSatisfaction(algoResult.Node.Value, bfsSatisfaction, shiftsContainer, algoResult.Weight, algoResult.ExecuteTime));
+            _schedulareStatisticsList[algoString].SchedulareSatisfactionList.Add(new SchedulareSatisfaction(algoResult.Node.Value, bfsSatisfaction, shiftsContainer, algoResult.Weight, 
+                                                                                                            algoResult.ExecuteTime, algoResult.MostUnfortunateWorkerPer));
         }
 
-        private void PrintDebugData(ShiftsContainer shiftsContainer, SchedulareState state,string algoName)
+        private void PrintDebugData(ShiftsContainer shiftsContainer, SchedulareState state, string algoName)
         {
             Console.WriteLine(algoName);
             double percentageOfSatisfaction = CommonLogic.GetPercentageOfSatisfaction(state.Node.Value, shiftsContainer);
             Console.WriteLine($"Weight = {state.Weight}");
             Console.WriteLine($"Satisfaction = {percentageOfSatisfaction}");
+            state.MostUnfortunateWorkerPer = CommonLogic.LocateAndPrintMostUnfortunateWorker(state.Node.Value, shiftsContainer);
             CommonLogic.PrintSchedulare(state.Node.Value, shiftsContainer);
 
             CommonLogic.ApeandToFile(algoName, FILENAME);
@@ -142,6 +172,8 @@ namespace Engine.Services
             string shiftsContainerJson = JsonConvert.SerializeObject(shiftsContainer);
             CommonLogic.ApeandToFile(shiftsContainerJson, FILENAME);
         }
+
+
     }
 }
 

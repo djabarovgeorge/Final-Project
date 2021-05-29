@@ -13,9 +13,9 @@ namespace Engine.Algorithms
         public IntervalHeap<SchedulareState> CloseSet { get; private set; }
         public IntervalHeap<SchedulareState> OpenSet { get; private set; }
 
-        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null)
+        public override SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
-            InitParams(schedulare, shiftsContainer, weightContainer);
+            InitParams(schedulare, shiftsContainer);
 
             var schedulareState = GetSchedulareState(schedulare.DeepClone(), shiftsContainer, TreeRoot);
 
@@ -90,11 +90,9 @@ namespace Engine.Algorithms
             return ret;
         }
 
-        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer)
+        private void InitParams(Schedulare schedulare, ShiftsContainer shiftsContainer)
         {
             ShiftsContainer = shiftsContainer;
-
-            UpdateWeights(weightContainer);
 
             CloseSet = new IntervalHeap<SchedulareState>(new SchedulareComparer());
 

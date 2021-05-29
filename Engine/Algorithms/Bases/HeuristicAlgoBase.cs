@@ -11,8 +11,9 @@ namespace Engine.Algorithms.Bases
 {
     public abstract class HeuristicAlgoBase : IAlgo
     {
-        private readonly int ALGORITHM_RUN_TIME_SECONDS = 120;
-        protected const bool DEBUG = false;
+        public int ALGORITHM_RUN_TIME_SECONDS => 60;
+
+        protected const bool DEBUG = true;
 
         private readonly Stopwatch timer = new Stopwatch();
         protected readonly Stopwatch ExecuteStopwatch = new Stopwatch();
@@ -30,7 +31,7 @@ namespace Engine.Algorithms.Bases
         protected SchedulareState CurrentBestSolution { get; set; }
 
 
-        public abstract SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer, WeightContainer weightContainer = null);
+        public abstract SchedulareState Execute(Schedulare schedulare, ShiftsContainer shiftsContainer);
 
 
 
@@ -51,7 +52,7 @@ namespace Engine.Algorithms.Bases
 
             return false;
         }
-        protected SchedulareState GetSchedulareState(Schedulare schedulare, ShiftsContainer shiftsContainer, TreeNode<Schedulare> treeNode)
+        protected SchedulareState GetSchedulareState(Schedulare schedulare, ShiftsContainer shiftsContainer, TreeNode<Schedulare> treeNode = null)
         {
 
             var weight = 0;
@@ -91,15 +92,6 @@ namespace Engine.Algorithms.Bases
             }
         }
 
-        protected void UpdateWeights(WeightContainer weightContainer)
-        {
-            if (weightContainer == null)
-                return;
-            _twoShiftsInARowWeight = weightContainer.TwoShiftsInARowWeight;
-            _lackSatisfactionConstraintsWeight = weightContainer.LackSatisfactionConstraintsWeight;
-            _shiftsInARow = weightContainer.ShiftsInARow;
-            _unwantedShift = weightContainer.UnwantedShift;
-        }
 
         protected virtual void PrintDebugData(ShiftsContainer shiftsContainer, SchedulareState state)
         {

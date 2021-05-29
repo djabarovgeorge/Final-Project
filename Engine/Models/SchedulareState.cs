@@ -10,5 +10,6 @@ namespace Engine.Models
         public int Weight { get; set; }
         public TreeNode<Schedulare> Node { get; set; }
         public double ExecuteTime { get; set; }
+        public double MostUnfortunateWorkerPer { get; set; }
     }
 }
