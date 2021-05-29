@@ -30,12 +30,6 @@ namespace Engine.Services
         {
             CommonLogic.InitFileSuffix();
 
-            var shiftsContainer = _constructsShift.Excute();
-
-            var schedulare = new Schedulare(shiftsContainer);
-
-            var randResult = RunRandAlgo(shiftsContainer, schedulare);
-
             RunCycle();
 
             return Task.FromResult(true);

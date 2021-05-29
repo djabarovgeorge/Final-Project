@@ -38,7 +38,7 @@ namespace Engine.Algorithms
             // step 3 resolve conflicts from previous step
             ResolveAndFillTheSchdulare(schedulare, shiftsContainer);
 
-            PrintDebugData(shiftsContainer, new SchedulareState() { Node = new TreeNode<Schedulare>(schedulare) });
+            var executionTime = _executeStopwatch.Elapsed.TotalSeconds;
 
             _executeStopwatch.Reset();
 

@@ -18,12 +18,12 @@ namespace Engine
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((_, services) =>
                     services.AddHostedService<Manager>()
-                        //.AddSingleton<IAlgo, BFS>()
-                        //.AddSingleton<IAlgo, WAStar>()
-                        //.AddSingleton<IAlgo, Tabu>()
-                        //.AddSingleton<IAlgo, TabuR>()
+                        .AddSingleton<IAlgo, BFS>()
+                        .AddSingleton<IAlgo, WAStar>()
+                        .AddSingleton<IAlgo, Tabu>()
+                        .AddSingleton<IAlgo, TabuR>()
                         .AddSingleton<IAlgo, Rand>()
-                        //.AddSingleton<IAlgo, GreedyAlgorithm>()
+                        .AddSingleton<IAlgo, GreedyAlgorithm>()
                         .AddSingleton<IFactory, AlgoFactory>());
 
     }

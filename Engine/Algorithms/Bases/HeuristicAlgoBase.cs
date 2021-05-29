@@ -13,7 +13,7 @@ namespace Engine.Algorithms.Bases
     {
         public int ALGORITHM_RUN_TIME_SECONDS => 60;
 
-        protected const bool DEBUG = true;
+        protected const bool DEBUG = false;
 
         private readonly Stopwatch timer = new Stopwatch();
         protected readonly Stopwatch ExecuteStopwatch = new Stopwatch();
